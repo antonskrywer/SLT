@@ -83,7 +83,6 @@ EDT_standalone  <- function(title = NULL,
     }),
     EDT_final_page(dict = dict)
   )
-  browser()
   if(is.null(title)){
     #extract title as named vector from dictionary
     title <-
