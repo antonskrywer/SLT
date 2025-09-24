@@ -1,7 +1,7 @@
-#' EDT languages
+#' SLT languages
 #'
-#' Lists the languages available for EDT implementations.
+#' Lists the languages available for SLT implementations.
 #' @export
-EDT_languages <- function() {
-  c("en", "de", "de_f", "ru", "nl", "it", "es", "zh_cn")
+SLT_languages <- function() {
+  c("en", "de", "de_f")
 }

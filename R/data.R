@@ -1,20 +1,14 @@
-#' EDT  dictionary
+#' SLT  dictionary
 #'
-#' The default internationalisation dictionary used by the EDT.
-#' @name EDT_dict
+#' The default internationalisation dictionary used by the SLT.
+#' @name SLT_dict
 #' @docType data
 NULL
 
-#' EDT item bank
+#' SLT item bank
 #'
-#' The EDT's item bank
-#' @name EDT_item_bank
+#' The SLT's item bank
+#' @name SLT_item_bank
 #' @docType data
 NULL
 
-#' EDT2 (adaptive) item bank
-#'
-#' The EDT2's item bank
-#' @name EDT2_item_bank
-#' @docType data
-NULL

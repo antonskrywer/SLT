@@ -1,17 +1,16 @@
-Package: EDT
+Package: SLT
 Type: Package
-Title: Emotion Discrimination Test
-Version: 1.2.5
-Author: Klaus Frieler
-Maintainer: Klaus Frieler <kf@omniversum.de>
-Description: Implementation of a musical emotion discrimination test.
+Title: Statistical Learning Test
+Version: 1.0.0
+Author: Anton Schreiber
+Maintainer: Anton Schreiber <anton.schreiber@uni-hamburg.de>
+Description: Implementation of a musical statistical learning test.
 License: MIT + file LICENSE
 Encoding: UTF-8
 LazyData: true
 Depends: 
     R (>= 3.5.0),
 Imports:
-    psychTestRCAT (>= 1.6.2),
     psychTestR (>= 2.21.2),
     shiny (>= 1.2.0),
     methods,
@@ -24,6 +23,5 @@ Suggests:
     codetools,
     devtools (>= 1.13.6)
 Remotes: 
-    pmcharrison/psychTestR,
-    pmcharrison/psychTestRCAT
-RoxygenNote: 7.2.3
+    pmcharrison/psychTestR
+RoxygenNote: 7.3.1

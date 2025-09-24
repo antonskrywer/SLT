@@ -1,21 +1,21 @@
-# Musical Emotion Discrimination Test (EDT)
+# Musical Emotion Discrimination Test (SLT)
 
 
-The EDT package contains the adaptive Musical Emotion Discrimination Test (aMEDT), an adaptive test for recognition of emotional interpretation of simple melodies. It also contains also an non-adaptive version (sMEDT) which can still be used, but we highly encourage to use the adaptive version.
+The SLT package contains the adaptive Musical Emotion Discrimination Test (aMSLT), an adaptive test for recognition of emotional interpretation of simple melodies. It also contains also an non-adaptive version (sMSLT) which can still be used, but we highly encourage to use the adaptive version.
 
 
 ## Citation
 
 We also advise mentioning the software versions you used,
-in particular the versions of the `EDT` and `psychTestR` packages.
+in particular the versions of the `SLT` and `psychTestR` packages.
 You can find these version numbers from R by running the following commands:
 
 ``` r
-library(EDT)
+library(SLT)
 library(psychTestR)
 if (!require(devtools)) install.packages("devtools")
 x <- devtools::session_info()
-x$packages[x$packages$package %in% c("EDT", "psychTestR"), ]
+x$packages[x$packages$package %in% c("SLT", "psychTestR"), ]
 ```
 
 ## Installation instructions (local use)
@@ -28,48 +28,48 @@ x$packages[x$packages$package %in% c("EDT", "psychTestR"), ]
 
 `install.packages('devtools')`
 
-4. Install the EDT:
+4. Install the SLT:
 
-`devtools::install_github('klausfrieler/EDT')`
+`devtools::install_github('klausfrieler/SLT')`
 
 ## Usage
 
 ### Quick demo 
 
-You can demo the EDT at the R console, as follows:
+You can demo the SLT at the R console, as follows:
 
 ``` r
-# Load the EDT package
-library(EDT)
+# Load the SLT package
+library(SLT)
 
 # Run a demo test, with feedback as you progress through the test,
 # and not saving your data
-EDT_demo()
+SLT_demo()
 
 # Run a demo test, skipping the training phase, and only asking 5 questions, as well a changing the language
-EDT_demo(num_items = 5, language = "en")
+SLT_demo(num_items = 5, language = "en")
 ```
 
 ### Testing a participant
 
-The `EDT_standalone()` function is designed for real data collection.
-In particular, the participant doesn't receive feedback during this version. Per default, the aMEDT is used. Setting the parameter `adaptive` to `FALSE` will run the  static version (sMEDT).
+The `SLT_standalone()` function is designed for real data collection.
+In particular, the participant doesn't receive feedback during this version. Per default, the aMSLT is used. Setting the parameter `adaptive` to `FALSE` will run the  static version (sMSLT).
 
 ``` r
-# Load the EDT package
-library(EDT)
+# Load the SLT package
+library(SLT)
 
 # Run the test as if for a participant, using default settings,
 # saving data, and with a custom admin password
 # set adaptive = FALSE for static version
-EDT_standalone(admin_password = "put-your-password-here", adaptive = TRUE) 
+SLT_standalone(admin_password = "put-your-password-here", adaptive = TRUE) 
 ```
 
 You will need to enter a participant ID for each participant.
 This will be stored along with their results.
 
 Each time you test a new participant,
-rerun the `EDT_standalone()` function,
+rerun the `SLT_standalone()` function,
 and a new participation session will begin.
 
 You can retrieve your data by starting up a participation session,
@@ -78,9 +78,9 @@ and downloading your data.
 For more details on the psychTestR interface, 
 see http://psychtestr.com/.
 
-The EDT currently supports English (en), German (de), Russian (ru), and Nederlands (nl).
+The SLT currently supports English (en), German (de), Russian (ru), and Nederlands (nl).
 You can select one of these languages by passing a language code as 
-an argument to `EDT_standalone()`, e.g., `EDT_standalone(languages = "de")`,
+an argument to `SLT_standalone()`, e.g., `SLT_standalone(languages = "de")`,
 or alternatively by passing it as a URL parameter to the test browser,
 eg. http://127.0.0.1:4412/?language=DE (note that the `p_id` argument must be empty).
 
@@ -96,17 +96,17 @@ https://www.rstudio.com/products/shiny/download-server/
 4. Make a folder to contain your new Shiny app.
 The name of this folder will correspond to the URL.
 
-`sudo mkdir EDT`
+`sudo mkdir SLT`
 
 5. Make a text file in this folder called `app.R`
 specifying the R code to run the app.
 
-- To open the text editor: `sudo nano EDT/app.R`
+- To open the text editor: `sudo nano SLT/app.R`
 - Write the following in the text file:
 
 ``` r
-library(EDT)
-EDT_standalone(admin_password = "put-your-password-here")
+library(SLT)
+SLT_standalone(admin_password = "put-your-password-here")
 ```
 
 - Save the file (CTRL-O).
@@ -114,17 +114,17 @@ EDT_standalone(admin_password = "put-your-password-here")
 6. Change the permissions of your app directory so that `psychTestR`
 can write its temporary files there.
 
-`sudo chown -R shiny EDT`
+`sudo chown -R shiny SLT`
 
 where `shiny` is the username for the Shiny process user
 (this is the usual default).
 
 7. Navigate to your new shiny app, with a URL that looks like this:
-`http://my-web-page.org:3838/EDT
+`http://my-web-page.org:3838/SLT
 
 ## Implementation notes
 
-By default, the adaptive EDT  implementation always estimates participant abilities
+By default, the adaptive SLT  implementation always estimates participant abilities
 using weighted-likelihood estimation.
 We adopt weighted-likelihood estimation for this release 
 because this technique makes fewer assumptions about the participant group being tested.
@@ -133,6 +133,6 @@ This makes the test better suited to testing with diverse participant groups
 
 ## Usage notes
 
-- The EDT runs in your web browser.
+- The SLT runs in your web browser.
 - By default, image files are hosted online on our servers.
 The test therefore requires internet connectivity.

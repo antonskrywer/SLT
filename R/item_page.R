@@ -70,7 +70,7 @@ get_audio_element <- function(url,
   #print(url)
   stopifnot(purrr::is_scalar_character(url),
             purrr::is_scalar_character(type)
-            )
+  )
   src    <- shiny::tags$source(src = url, type = paste0("audio/", type))
   script <- shiny::tags$script(shiny::HTML(media_js$media_not_played))
   audio  <- shiny::tags$audio(
@@ -94,7 +94,6 @@ audio_NAFC_page_flex <- function(label,
                                  choices,
                                  audio_url,
                                  correct_answer,
-                                 adaptive = adaptive,
                                  save_answer = TRUE,
                                  get_answer = NULL,
                                  on_complete = NULL,
@@ -107,30 +106,23 @@ audio_NAFC_page_flex <- function(label,
     tagify(prompt),
     audio_ui,
     psychTestR::make_ui_NAFC(choices,
-                 labels = choices,
-                 hide = TRUE,
-                 arrange_vertically = FALSE,
-                 id = "response_ui")
-    )
-  if (adaptive){
-    if(is.null(get_answer)){
-      get_answer <- function(input, ...) {
-        as.numeric(gsub("answer", "", input$last_btn_pressed))
+                             labels = choices,
+                             hide = TRUE,
+                             arrange_vertically = FALSE,
+                             id = "response_ui")
+  )
 
-      }
-      validate <- function(answer, ...) !is.null(answer)
-    }
+  get_answer <- function(input, ...) {
+    #browser()
+    answer <- as.numeric(gsub("answer", "", input$last_btn_pressed))
+    item_bank = SLT::SLT_item_bank %>% mutate(label = sprintf("q%d_%d", block, item_number))
+    correct <- item_bank[item_bank$label == label,]$correct == answer
+    tibble(answer = answer,
+           label = label,
+           correct = correct)
   }
-  else {
-    get_answer <- function(input, ...) {
-      answer <- as.numeric(gsub("answer", "", input$last_btn_pressed))
-      correct <- EDT::EDT_item_bank[EDT::EDT_item_bank$item_number == label,]$correct == answer
-      tibble(answer = answer,
-             label = label,
-             correct = correct)
-    }
-    validate <- function(answer, ...) !is.null(answer)
-  }
+  validate <- function(answer, ...) !is.null(answer)
+
   psychTestR::page(ui = ui, label = label,
                    get_answer = get_answer, save_answer = save_answer,
                    validate = validate, on_complete = on_complete,
@@ -138,23 +130,20 @@ audio_NAFC_page_flex <- function(label,
                    admin_ui = admin_ui)
 }
 
-EDT_item <- function(label = "",
+SLT_item <- function(label = "",
                      emotion,
                      audio_file,
                      correct_answer,
                      prompt = "",
                      audio_dir = "",
-                     adaptive = adaptive,
                      save_answer = TRUE,
                      on_complete = NULL,
                      get_answer = NULL,
-                     instruction_page = FALSE,
                      autoplay = TRUE
-                     ){
+){
   page_prompt <- shiny::div(prompt)
   choices <- c("1", "2")
   audio_url <- file.path(audio_dir, audio_file)
-  messagef("instruction_page = %s, autoplay = %s, !instruction_page && autoplay = %s", instruction_page, autoplay, !instruction_page || autoplay)
   audio_NAFC_page_flex(label = label,
                        prompt = page_prompt,
                        audio_url = audio_url,
@@ -162,8 +151,21 @@ EDT_item <- function(label = "",
                        correct_answer = correct_answer,
                        save_answer = save_answer,
                        get_answer = get_answer,
-                       autoplay = !instruction_page && autoplay,
-                       on_complete = on_complete,
-                       adaptive = adaptive)
+                       autoplay = autoplay,
+                       on_complete = on_complete
+  )
 }
 
+item_feedback_page <- function(){
+psychTestR::reactive_page(function(answer, ...) {
+    #browser()
+    if (answer$correct == TRUE) {
+      composer = answer$answer
+      prompt = psychTestR::i18n("CORRECT_A", sub = list(composer = composer))
+    }  else {
+      composer = 3 - answer$answer
+      prompt = psychTestR::i18n("FALSE_A", sub = list(composer = composer))
+    }
+    psychTestR::one_button_page(body = prompt, button_text = psychTestR::i18n("CONTINUE"))
+  })
+}
