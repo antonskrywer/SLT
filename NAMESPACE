@@ -2,7 +2,6 @@
 
 export(SLT)
 export(SLT_demo)
-export(SLT_feedback_with_graph)
 export(SLT_feedback_with_score)
 export(SLT_languages)
 export(SLT_standalone)
