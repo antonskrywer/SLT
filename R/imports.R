@@ -7,6 +7,9 @@ NULL
 #' @importFrom dplyr "filter"
 NULL
 
+#' @importFrom dplyr "bind_rows"
+NULL
+
 #' @importFrom dplyr "pull"
 NULL
 
