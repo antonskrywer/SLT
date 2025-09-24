@@ -13,6 +13,9 @@ NULL
 #' @importFrom dplyr "pull"
 NULL
 
+#' @importFrom purrr "pluck"
+NULL
+
 #' @importFrom tibble "tibble"
 NULL
 
