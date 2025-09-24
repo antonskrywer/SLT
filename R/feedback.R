@@ -20,7 +20,7 @@ SLT_feedback_with_score <- function(dict = SLT::SLT_dict) {
         #browser()
         text_finish2 <- NULL
         text_finish3 <- NULL
-        browser()
+        #browser()
         text_finish1 <- psychTestR::i18n("FINAL_FEEDBACK_BLOCK1",
                                           html = TRUE,
                                           sub = list(number_correct_1 = results$sum[[1]]))

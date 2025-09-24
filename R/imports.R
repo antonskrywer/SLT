@@ -10,6 +10,9 @@ NULL
 #' @importFrom dplyr "bind_rows"
 NULL
 
+#' @importFrom dplyr "n"
+NULL
+
 #' @importFrom dplyr "group_by"
 NULL
 
