@@ -10,6 +10,9 @@ NULL
 #' @importFrom dplyr "bind_rows"
 NULL
 
+#' @importFrom dplyr "summarise"
+NULL
+
 #' @importFrom dplyr "pull"
 NULL
 
