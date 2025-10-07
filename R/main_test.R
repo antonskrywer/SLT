@@ -32,22 +32,23 @@ main_test <- function(label,
       item <- SLT::SLT_item_bank %>%
         filter(block == j, item_number == item_sequence[i])
       messagef("Adding item %d from block %d", item_sequence[i], j)
-
       item_page <- SLT_item( label = sprintf("q%d_%d", item$block[1], item$item_number[1]),
                              correct_answer = item$correct[1],
                              prompt = get_prompt(i, num_items),
                              audio_file = item$audio_file[1],
                              audio_dir = audio_dir,
-                             save_answer = TRUE, autoplay = autoplay )
-      #browser()
+                             save_answer = TRUE, autoplay = autoplay)
       elts <- c(elts, item_page, item_feedback_page())
     }
     if (j != num_blocks) {
     elts <- c(elts, break_page(block = j))
     }
+    #all_elts <- c(elts, block)
   }
   elts <- c(elts, SLT_feedback_with_score())
 }
+
+
 
 item_page <- function(item_number, item_id, num_items, audio_dir, autoplay,
                       dict = SLT::SLT_dict) {
