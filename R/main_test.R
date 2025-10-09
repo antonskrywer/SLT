@@ -4,10 +4,13 @@ scoring <- function(label = "SLT"){
     results <- psychTestR::get_results(state = state,
                                        complete = FALSE,
                                        add_session_info = FALSE) %>% as.list()
-
-    sum_score <- sum(purrr::map_lgl(results[[label]], function(x) x$correct))
-    num_question <- length(results[[label]])
+    results <- results[[label]]
+    results <- results[!str_detect(names(results), "block")]
+    #return()
+    sum_score <- sum(purrr::map_lgl(results, function(x) x$correct))
+    num_question <- length(results)
     perc_correct <- sum_score/num_question
+    #browser()
     psychTestR::save_result(place = state,
                  label = "score",
                  value = perc_correct)
@@ -27,27 +30,42 @@ main_test <- function(label,
   elts <- c()
   item_bank <- SLT::SLT_item_bank
   for (j in 1:num_blocks) {
-    item_sequence <- sample(1:max(item_bank$item_number), num_items)
+    #item_sequence <- sample(1:max(item_bank$item_number), num_items)
+    item_sequence <- 1:num_items
+    block_elts <- c()
     for (i in 1:length(item_sequence)) {
       item <- SLT::SLT_item_bank %>%
         filter(block == j, item_number == item_sequence[i])
       messagef("Adding item %d from block %d", item_sequence[i], j)
-
       item_page <- SLT_item( label = sprintf("q%d_%d", item$block[1], item$item_number[1]),
                              correct_answer = item$correct[1],
                              prompt = get_prompt(i, num_items),
                              audio_file = item$audio_file[1],
                              audio_dir = audio_dir,
-                             save_answer = TRUE, autoplay = autoplay )
-      #browser()
-      elts <- c(elts, item_page, item_feedback_page())
+                             save_answer = TRUE, autoplay = autoplay)
+      block_elts <- c(block_elts, item_page, item_feedback_page())
     }
+
+    elts <- c(elts, psychTestR::order_at_run_time(logic = block_elts,
+                                                  label = sprintf("block%d", j),
+                                                  get_order = function(...){
+                                                    order <- rep(0, 2 * num_items)
+                                                    item_pages <- 2* (sample(1:num_items) - 1) + 1
+                                                    feedback_pages <- item_pages + 1
+                                                    order[2 * (1:num_items - 1) + 1] <- item_pages
+                                                    order[2 * (1:num_items - 1) + 2] <- feedback_pages
+                                                    print(order)
+                                                    order
+
+                                                  }))
     if (j != num_blocks) {
-    elts <- c(elts, break_page(block = j))
+      elts <- c(elts, break_page(block = j))
     }
   }
-  elts <- c(elts, SLT_feedback_with_score())
+  elts
 }
+
+
 
 item_page <- function(item_number, item_id, num_items, audio_dir, autoplay,
                       dict = SLT::SLT_dict) {
@@ -69,18 +87,18 @@ item_page <- function(item_number, item_id, num_items, audio_dir, autoplay,
 get_prompt <- function(item_number, num_items,
                        dict = SLT::SLT_dict) {
   shiny::div(
-    shiny::h4(
-      psychTestR::i18n(
-        "PROGRESS_TEXT",
-        sub = list(num_question = item_number,
-                   test_length = if (is.null(num_items))
-                     "?" else
-                       num_items)),
-      style  = "text_align:left"
-    ),
+    # shiny::h4(
+    #   # psychTestR::i18n(
+    #   #   "PROGRESS_TEXT",
+    #   #   sub = list(num_question = item_number,
+    #     #            test_length = if (is.null(num_items))
+    #     #              "?" else
+    #     #                num_items)),
+    #   style  = "text_align:left"
+    # ),
     shiny::p(
       psychTestR::i18n("ITEM_INSTRUCTION"),
-      style = "margin-left:20%;margin-right:20%;text-align:justify")
+      style = "margin-left:20%;margin-right:20%;text-align:center")
     )
 }
 
@@ -126,7 +144,7 @@ break_page <- function(dict = SLT::SLT_dict, block){
     psychTestR::one_button_page(
       body =  shiny::div(
         psychTestR::i18n(sprintf("BREAK_PAGE%d", block)),
-        style = "margin-left:0%;display:block"),
+        style = "margin-left:0%;display:block;text-align:justify;width:60%"),
       button_text = psychTestR::i18n("CONTINUE")
     )
 }
