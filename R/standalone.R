@@ -45,8 +45,8 @@ SLT_standalone  <- function(title = NULL,
                            ...) {
   feedback <- NULL
   if(with_feedback) {
-    feedback <- SLT::SLT_feedback_with_graph()
-    #feedback <- SLT::SLT_feedback_with_score()
+    #feedback <- SLT::SLT_feedback_with_graph()
+    feedback <- SLT::SLT_feedback_with_score()
   }
   elts <- psychTestR::join(
     if(with_id)

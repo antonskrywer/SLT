@@ -28,12 +28,11 @@ SLT <- function(num_items = 20,
                 take_training = FALSE,
                 with_finish = TRUE,
                 label = "SLT",
-                feedback = SLT_feedback_with_score(),
+                feedback = SLT_feedback_with_score(dict = SLT::SLT_dict),
                 dict = SLT::SLT_dict,
                 autoplay = TRUE
           ) {
   audio_dir <- "https://s3.eu-west-1.amazonaws.com/media.dots.org/stimuli/SLT/"
-
   stopifnot(purrr::is_scalar_character(label),
             purrr::is_scalar_integer(num_items) || purrr::is_scalar_double(num_items),
             purrr::is_scalar_character(audio_dir),
@@ -42,7 +41,10 @@ SLT <- function(num_items = 20,
               psychTestR::is.test_element(feedback) ||
               is.null(feedback))
   audio_dir <- gsub("/$", "", audio_dir)
-
+  # if(!is.null(feedback)){
+  #   feedback <- feedback(dict = dict)
+  # }
+  #browser()
   psychTestR::join(
     psychTestR::begin_module(label),
     if (take_training) psychTestR::new_timeline(instructions(audio_dir),
@@ -60,6 +62,10 @@ SLT <- function(num_items = 20,
     scoring(),
     psychTestR::elt_save_results_to_disk(complete = TRUE),
     feedback,
+    psychTestR::code_block(function(state, ...){
+      res <- psychTestR::get_results(state, complete = T, add_session_info = T) %>% as.list()
+      #browser()
+    }),
     if(with_finish) SLT_finished_page(),
     psychTestR::end_module())
 }

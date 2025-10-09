@@ -11,7 +11,7 @@ SLT(
   take_training = FALSE,
   with_finish = TRUE,
   label = "SLT",
-  feedback = SLT_feedback_with_score(),
+  feedback = SLT_feedback_with_score(dict = SLT::SLT_dict),
   dict = SLT::SLT_dict,
   autoplay = TRUE
 )

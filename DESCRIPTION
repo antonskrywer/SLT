@@ -1,7 +1,7 @@
 Package: SLT
 Type: Package
 Title: Statistical Learning Test
-Version: 1.0.0
+Version: 1.1.0
 Author: Anton Schreiber
 Maintainer: Anton Schreiber <anton.schreiber@uni-hamburg.de>
 Description: Implementation of a musical statistical learning test.
