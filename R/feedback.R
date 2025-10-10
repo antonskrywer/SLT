@@ -16,7 +16,7 @@ SLT_feedback_with_score <- function(dict = SLT::SLT_dict) {
                                            add_session_info = FALSE) %>%
           as.list() %>%
           pluck("SLT")
-        results <- results[str_detect(names(results), "q[0-9]+")] %>% bind_rows()
+        results <- results[stringr::str_detect(names(results), "q[0-9]+")] %>% bind_rows()
         #browser()
         # return(
         #   psychTestR::one_button_page(

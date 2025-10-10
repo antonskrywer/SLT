@@ -5,7 +5,7 @@ scoring <- function(label = "SLT"){
                                        complete = FALSE,
                                        add_session_info = FALSE) %>% as.list()
     results <- results[[label]]
-    results <- results[!str_detect(names(results), "block")]
+    results <- results[!stringr::str_detect(names(results), "block")]
     #return()
     sum_score <- sum(purrr::map_lgl(results, function(x) x$correct))
     num_question <- length(results)
