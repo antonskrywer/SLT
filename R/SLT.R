@@ -22,17 +22,21 @@
 #' @param autoplay (Scalar boolean) Indicates whether you want to have autoplay for item pages (instruction pages always not-autoplay)
 #' @export
 
-SLT <- function(num_items = 20,
-                num_blocks = 3,
+SLT <- function(num_items = 20L,
+                num_blocks = 3L,
                 with_welcome = TRUE,
                 take_training = FALSE,
                 with_finish = TRUE,
                 label = "SLT",
+                version = 1,
                 feedback = SLT_feedback_with_score(dict = SLT::SLT_dict),
                 dict = SLT::SLT_dict,
-                autoplay = TRUE
+                autoplay = TRUE,
+                ...
           ) {
-  audio_dir <- "https://s3.eu-west-1.amazonaws.com/media.dots.org/stimuli/SLT/"
+  audio_dir <- ifelse(version == 1,
+                      "https://s3.eu-west-1.amazonaws.com/media.dots.org/stimuli/SLT/",
+                      "https://s3.eu-west-1.amazonaws.com/media.gold-msi.org/test_materials/SLT/")
   stopifnot(purrr::is_scalar_character(label),
             purrr::is_scalar_integer(num_items) || purrr::is_scalar_double(num_items),
             purrr::is_scalar_character(audio_dir),
@@ -50,7 +54,7 @@ SLT <- function(num_items = 20,
     if (take_training) psychTestR::new_timeline(instructions(audio_dir),
                                                 dict = dict),
     if (with_welcome) SLT_welcome_page(),
-    psychTestR::new_timeline(
+    if(version == 1) psychTestR::new_timeline(
       main_test(label = label,
                 num_items = num_items,
                 num_blocks = num_blocks,
@@ -59,6 +63,16 @@ SLT <- function(num_items = 20,
                 autoplay = autoplay
                 ),
                 dict = dict),
+    if(version == 2) psychTestR::new_timeline(
+      main_test2(label = label,
+                 num_items = num_items,
+                 audio_dir = audio_dir,
+                 dict = dict,
+                 n_start = list(...)$n_start,
+                 min_each = list(...)$min_each,
+                 autoplay = autoplay
+      ),
+      dict = dict),
     scoring(),
     psychTestR::elt_save_results_to_disk(complete = TRUE),
     feedback,
