@@ -160,9 +160,9 @@ SLT_item2 <- function(audio_dir = "",
                       autoplay = TRUE){
   psychTestR::reactive_page(function(state, ...) {
     #browser()
-    counter <- get_global("counter", state)
-    cur_block <- get_global("block", state)
-    seq_df <- get_global("items", state)
+    counter <- psychTestR::get_global("counter", state)
+    cur_block <- psychTestR::get_global("block", state)
+    seq_df <- psychTestR::get_global("items", state)
     item   <- seq_df[counter, ]
     stim_url <- sprintf("%s/%s.mp3", audio_dir, item$file_name)
     label <- sprintf("q%d_%d", cur_block, counter)
@@ -175,14 +175,14 @@ SLT_item2 <- function(audio_dir = "",
       on_complete = function(answer, state, ...) {
         #browser()
         correct     <- as.integer(answer == item$style)
-        results <- get_global("results", state)
+        results <- psychTestR::get_global("results", state)
         new_row <-  item %>%
           mutate(seq_id = counter,
                  block_no  = cur_block,
                  answer= answer,
                  correct = correct)
-        set_global("counter", counter + 1, state)
-        set_global("results",
+        psychTestR::set_global("counter", counter + 1, state)
+        psychTestR::set_global("results",
                    bind_rows(results, new_row),
                    state)
       }
@@ -193,8 +193,8 @@ SLT_item2 <- function(audio_dir = "",
 item_feedback_page <- function() {
   psychTestR::reactive_page(function(answer, state, ...) {
     #browser()
-    results <- get_global("results", state)
-    answer <- results %>% slice(nrow(results))
+    results <- psychTestR::get_global("results", state)
+    answer <- results %>% dplyr::slice(nrow(results))
     if (answer$correct == TRUE) {
       composer = answer$answer
       prompt = psychTestR::i18n("CORRECT_A", sub = list(composer = composer))

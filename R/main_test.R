@@ -1,7 +1,7 @@
 scoring <- function(label = "SLT"){
   psychTestR::code_block(function(state,...){
     #browser()
-    results <- get_global("results", state)
+    results <- psychTestR::get_global("results", state)
     sum_score <- sum(results$correct)
     num_question <- nrow(results)
     perc_correct <- sum_score/num_question
@@ -71,8 +71,8 @@ main_test2 <- function(label,
                        min_each = 2,
                        autoplay = TRUE, ...) {
   elts <- psychTestR::code_block(function(state, ...) {
-    set_global("block", 0, state)
-    set_global("results", data.frame(), state)
+    psychTestR::set_global("block", 0, state)
+    psychTestR::set_global("results", data.frame(), state)
   })
 
   item_bank <- SLT::SLT_item_bank2
@@ -83,7 +83,7 @@ main_test2 <- function(label,
 
     block_elts <- psychTestR::code_block(function(state, ...) {
       #browser()
-      block <- get_global("block", state)
+      block <- psychTestR::get_global("block", state)
       seq_df <- get_items(
         difficulty =  difficulties[block + 1],
         num_items = num_items,
@@ -91,9 +91,9 @@ main_test2 <- function(label,
         min_each  = min_each
       )
 
-      set_global("items", seq_df, state)
-      set_global("counter", 1, state)
-      set_global("block", block + 1, state)
+      psychTestR::set_global("items", seq_df, state)
+      psychTestR::set_global("counter", 1, state)
+      psychTestR::set_global("block", block + 1, state)
     })
 
 
@@ -225,10 +225,19 @@ get_items <- function(difficulty = c("easy", "medium", "hard"),
 
   if (!is.null(seed)) set.seed(seed)
   difficulty <- match.arg(difficulty)
-  block_id <- SLT_item_bank2 %>% filter(difficulty == !!difficulty) %>% pull(block) %>% sample(1)
-  pool <- SLT_item_bank2 %>% filter(block == block_id)
+  block_id <- SLT::SLT_item_bank2 %>% filter(difficulty == !!difficulty) %>% pull(block) %>% sample(1)
+  pool <- SLT::SLT_item_bank2 %>% filter(block == block_id)
+  if(num_items == 2){
+    itemA <- pool %>% filter(style == "A") %>% dplyr::sample_n(1)
+    itemB <- pool %>% filter(style == "B") %>% dplyr::sample_n(1)
+    return(bind_rows(itemA, itemB) %>%
+             mutate(idx = "start", seq_id = sample(1:nrow(.))) %>%
+             dplyr::sample_n(2)
+           )
+  }
+
   if(num_items < n_start){
-    stop("Num items must be at least n_start")
+    stop(sprintf("Num items [%d] must be at least n_start [%d]", num_items, n_start))
   }
   n_per_style <- floor(num_items / 2)  # 12 Items pro Style
   max_offset <- n_start - 2 * min_each
@@ -237,7 +246,7 @@ get_items <- function(difficulty = c("easy", "medium", "hard"),
   offsetB <- max_offset - offsetA
 
 
-  if((n_per_style - min_each  - offsetB) <0 ){
+  if((n_per_style - min_each  - offsetB) <0 || (n_per_style - min_each  - offsetA  +  num_items %% 2) < 0){
     browser()
   }
   idxA <- c(rep("start", min_each + offsetA), rep("tail", n_per_style - min_each  - offsetA  +  num_items %% 2))
@@ -256,6 +265,6 @@ get_items <- function(difficulty = c("easy", "medium", "hard"),
   else{
     bind_rows(start[sample(1:nrow(start)),],
             tail[sample(1:nrow(tail)),]) %>%
-      slice(1:num_items) %>% mutate(seq_id = 1:nrow(.))
+      dplyr::slice(1:num_items) %>% mutate(seq_id = 1:nrow(.))
   }
 }
