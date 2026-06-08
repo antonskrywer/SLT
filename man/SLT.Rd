@@ -5,15 +5,17 @@
 \title{SLT}
 \usage{
 SLT(
-  num_items = 20,
-  num_blocks = 3,
+  num_items = 20L,
+  num_blocks = 3L,
   with_welcome = TRUE,
   take_training = FALSE,
   with_finish = TRUE,
   label = "SLT",
+  version = 1,
   feedback = SLT_feedback_with_score(dict = SLT::SLT_dict),
   dict = SLT::SLT_dict,
-  autoplay = TRUE
+  autoplay = TRUE,
+  ...
 )
 }
 \arguments{

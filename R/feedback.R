@@ -10,29 +10,18 @@
 SLT_feedback_with_score <- function(dict = SLT::SLT_dict) {
   psychTestR::new_timeline(
       psychTestR::reactive_page(function(state, ...) {
-        #browser()
         results <- psychTestR::get_results(state = state,
                                            complete = TRUE,
                                            add_session_info = FALSE) %>%
           as.list() %>%
           pluck("SLT")
-        results <- results[stringr::str_detect(names(results), "q[0-9]+")] %>% bind_rows()
+
+
         #browser()
-        # return(
-        #   psychTestR::one_button_page(
-        #     body= "TEST",
-        #     button_text = psychTestR::i18n("CONTINUE")
-        #   )
-        # )
-        results <- results %>%
-          mutate(block = substr(label, 2,2)) %>%
-          group_by(block) %>%
+        results <- results$items %>%
+          group_by(block_no) %>%
           summarise(sum = sum(correct),
                     num_questions = n())
-        #sum_score <- sum(purrr::map_lgl(result"s[[1]], function(x) x$correct))
-        #num_question <- length(results[[1]])
-        #messagef("Sum scores: %d, total items: %d", sum_score, num_question)
-        #browser()
         text_finish2 <- NULL
         text_finish3 <- NULL
         #browser()

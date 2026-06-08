@@ -155,17 +155,54 @@ SLT_item <- function(label = "",
                        on_complete = on_complete
   )
 }
-
-item_feedback_page <- function(){
-psychTestR::reactive_page(function(answer, ...) {
+SLT_item2 <- function(audio_dir = "",
+                      save_answer = TRUE,
+                      autoplay = TRUE){
+  psychTestR::reactive_page(function(state, ...) {
     #browser()
+    counter <- psychTestR::get_global("counter", state)
+    cur_block <- psychTestR::get_global("block", state)
+    seq_df <- psychTestR::get_global("items", state)
+    item   <- seq_df[counter, ]
+    stim_url <- sprintf("%s/%s.mp3", audio_dir, item$file_name)
+    label <- sprintf("q%d_%d", cur_block, counter)
+    messagef("[%s] counter: %s", label, counter)
+    psychTestR::audio_NAFC_page(
+      label   = label,
+      prompt  = get_prompt(counter, num_items),
+      url     = stim_url,
+      choices = c("A", "B"),
+      on_complete = function(answer, state, ...) {
+        #browser()
+        correct     <- as.integer(answer == item$style)
+        results <- psychTestR::get_global("results", state)
+        new_row <-  item %>%
+          mutate(seq_id = counter,
+                 block_no  = cur_block,
+                 answer= answer,
+                 correct = correct)
+        psychTestR::set_global("counter", counter + 1, state)
+        psychTestR::set_global("results",
+                   bind_rows(results, new_row),
+                   state)
+      }
+    )
+  })
+}
+
+item_feedback_page <- function() {
+  psychTestR::reactive_page(function(answer, state, ...) {
+    #browser()
+    results <- psychTestR::get_global("results", state)
+    answer <- results %>% dplyr::slice(nrow(results))
     if (answer$correct == TRUE) {
       composer = answer$answer
       prompt = psychTestR::i18n("CORRECT_A", sub = list(composer = composer))
     }  else {
-      composer = 3 - answer$answer
+      composer = setdiff(c("A", "B"), answer$answer)
       prompt = psychTestR::i18n("FALSE_A", sub = list(composer = composer))
     }
-    psychTestR::one_button_page(body = prompt, button_text = psychTestR::i18n("CONTINUE"))
+    psychTestR::one_button_page(body = prompt,
+                                button_text = psychTestR::i18n("CONTINUE"))
   })
 }

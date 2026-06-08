@@ -2,7 +2,11 @@
 options(shiny.error = browser)
 debug_locally <- !grepl("shiny-server", getwd())
 
+null_or_else <- function(x, default){
+  if(is.null(x)) default
+  else x
 
+}
 #' Standalone SLT
 #'
 #' This function launches a standalone testing session for the SLT
@@ -30,11 +34,12 @@ debug_locally <- !grepl("shiny-server", getwd())
 #' @export
 
 SLT_standalone  <- function(title = NULL,
-                           num_items = 20,
+                           num_items = 24L,
                            num_blocks = 3,
-                           with_id = TRUE,
+                           with_id = FALSE,
                            with_feedback = FALSE,
                            with_welcome = TRUE,
+                           version = 1,
                            admin_password = "conifer",
                            researcher_email = "anton.schreiber@uni-hamburg.de",
                            languages = c("en", "de", "de_f"),
@@ -62,7 +67,10 @@ SLT_standalone  <- function(title = NULL,
                with_finish = FALSE,
                feedback = feedback,
                dict = dict,
+               n_start = null_or_else(list(...)$n_start, 6),
+               min_each = null_or_else(list(...)$min_each, 2),
                take_training = TRUE,
+               version = version,
                autoplay = autoplay,
                ...)
     else
@@ -71,7 +79,10 @@ SLT_standalone  <- function(title = NULL,
                with_welcome = with_welcome,
                with_finish = FALSE,
                feedback = feedback,
+               version = version,
                dict = dict,
+               n_start = null_or_else(list(...)$n_start, 6),
+               min_each = null_or_else(list(...)$min_each, 2),
                autoplay = autoplay,
                ...),
     psychTestR::elt_save_results_to_disk(complete = TRUE),
