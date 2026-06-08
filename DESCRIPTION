@@ -1,8 +1,8 @@
 Package: SLT
 Type: Package
 Title: Statistical Learning Test
-Version: 1.1.0
-Author: Anton Schreiber
+Version: 1.2.1
+Author: Anton Schreiber, Klaus Frieler
 Maintainer: Anton Schreiber <anton.schreiber@uni-hamburg.de>
 Description: Implementation of a musical statistical learning test.
 License: MIT + file LICENSE
@@ -24,4 +24,4 @@ Suggests:
     devtools (>= 1.13.6)
 Remotes: 
     pmcharrison/psychTestR
-RoxygenNote: 7.3.1
+RoxygenNote: 7.3.3
