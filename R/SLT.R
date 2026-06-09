@@ -36,7 +36,7 @@ SLT <- function(num_items = 20L,
           ) {
   audio_dir <- ifelse(version == 1,
                       "https://s3.eu-west-1.amazonaws.com/media.dots.org/stimuli/SLT/",
-                      "https://s3.eu-west-1.amazonaws.com/media.gold-msi.org/test_materials/SLT/")
+                      "https://s3.eu-west-1.amazonaws.com/media.dots.org/stimuli/SLT2/")
   stopifnot(purrr::is_scalar_character(label),
             purrr::is_scalar_integer(num_items) || purrr::is_scalar_double(num_items),
             purrr::is_scalar_character(audio_dir),
