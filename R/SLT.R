@@ -51,9 +51,9 @@ SLT <- function(num_items = 20L,
   #browser()
   psychTestR::join(
     psychTestR::begin_module(label),
+    if (with_welcome) SLT_welcome_page(),
     if (take_training) psychTestR::new_timeline(instructions(audio_dir),
                                                 dict = dict),
-    if (with_welcome) SLT_welcome_page(),
     if(version == 1) psychTestR::new_timeline(
       main_test(label = label,
                 num_items = num_items,

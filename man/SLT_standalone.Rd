@@ -6,7 +6,7 @@
 \usage{
 SLT_standalone(
   title = NULL,
-  num_items = 20,
+  num_items = 24L,
   num_blocks = 3,
   with_id = FALSE,
   with_feedback = FALSE,

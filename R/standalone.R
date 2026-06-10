@@ -63,7 +63,7 @@ SLT_standalone  <- function(title = NULL,
     if(take_training)
       SLT::SLT(num_items = num_items,
                num_blocks = num_blocks,
-               with_welcome =  FALSE,
+               with_welcome =  with_welcome,
                with_finish = FALSE,
                feedback = feedback,
                dict = dict,
