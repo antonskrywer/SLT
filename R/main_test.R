@@ -69,10 +69,16 @@ main_test2 <- function(label,
                        dict = SLT::SLT_dict,
                        n_start = 6,
                        min_each = 2,
+                       composer_pairs = list(        # NEU — Default-Werte
+                         c(A = "Noa",  B = "Sam"),
+                         c(A = "Alex", B = "Robin"),
+                         c(A = "Kai",  B = "Mika")
+                       ),
                        autoplay = TRUE, ...) {
   elts <- psychTestR::code_block(function(state, ...) {
     psychTestR::set_global("block", 0, state)
     psychTestR::set_global("results", data.frame(), state)
+    psychTestR::set_global("composer_pairs", composer_pairs, state)  # NEU
   })
 
   item_bank <- SLT::SLT_item_bank2
@@ -95,7 +101,10 @@ main_test2 <- function(label,
       psychTestR::set_global("counter", 1, state)
       psychTestR::set_global("block", block + 1, state)
     })
-
+    if (j == 1) {                          # NEU
+      block_elts <- c(block_intro_page(),  # NEU
+                      block_elts)          # NEU
+    }                                      # NEU
 
     for (i in 1:num_items) {
       messagef("Adding item %d from block %d", i, j)
@@ -166,27 +175,44 @@ SLT_final_page <- function(dict = SLT::SLT_dict){
       )
     ), dict = dict)
 }
-
+block_intro_page <- function(dict = SLT::SLT_dict) {
+  psychTestR::reactive_page(function(state, ...) {
+    composer_pairs <- psychTestR::get_global("composer_pairs", state)
+    pair           <- composer_pairs[[1]]   # immer Block 1
+    psychTestR::one_button_page(
+      body = shiny::div(
+        psychTestR::i18n(
+          "BLOCK1_INTRO",
+          sub = list(composer_a = pair[["A"]],
+                     composer_b = pair[["B"]])
+        ),
+        style = "margin-left:20%;margin-right:20%;width:60%;
+                 display:block;text-align:justify"
+      ),
+      button_text = psychTestR::i18n("CONTINUE")
+    )
+  })
+}
 break_page <- function(dict = SLT::SLT_dict, block) {
   if (block >= 3) {
     return(NULL)
   }
-  psychTestR::one_button_page(
-    body =  shiny::div(psychTestR::i18n(sprintf(
-      "BREAK_PAGE%d", block
-    )), style = "margin-left:0%;display:block;text-align:justify;width:60%"),
-    button_text = psychTestR::i18n("CONTINUE")
-  )
-}
-
-correct_a <- function(dict = SLT::SLT_dict){
-  psychTestR::new_timeline(
+  psychTestR::reactive_page(function(state, ...) {
+    composer_pairs <- psychTestR::get_global("composer_pairs", state)
+    next_pair      <- composer_pairs[[block + 1]]   # Namen für den nächsten Block
+    name_a <- next_pair[["A"]]
+    name_b <- next_pair[["B"]]
     psychTestR::one_button_page(
-      body =  shiny::div(
-        psychTestR::i18n("CORRECT_A"),
-        style = "margin-left:0%;display:block"),
+      body = shiny::div(
+        psychTestR::i18n(
+          sprintf("BREAK_PAGE%d", block),
+          sub = list(composer_a = name_a, composer_b = name_b)
+        ),
+        style = "margin-left:0%;display:block;text-align:justify;width:60%"
+      ),
       button_text = psychTestR::i18n("CONTINUE")
-    ), dict = dict)
+    )
+  })
 }
 
 correct_b <- function(dict = SLT::SLT_dict){

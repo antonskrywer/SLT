@@ -94,6 +94,7 @@ audio_NAFC_page_flex <- function(label,
                                  choices,
                                  audio_url,
                                  correct_answer,
+                                 choice_labels = NULL,
                                  save_answer = TRUE,
                                  get_answer = NULL,
                                  on_complete = NULL,
@@ -106,7 +107,7 @@ audio_NAFC_page_flex <- function(label,
     tagify(prompt),
     audio_ui,
     psychTestR::make_ui_NAFC(choices,
-                             labels = choices,
+                             labels = if (!is.null(choice_labels)) choice_labels else choices,
                              hide = TRUE,
                              arrange_vertically = FALSE,
                              id = "response_ui")
@@ -159,32 +160,35 @@ SLT_item2 <- function(audio_dir = "",
                       save_answer = TRUE,
                       autoplay = TRUE){
   psychTestR::reactive_page(function(state, ...) {
-    #browser()
-    counter <- psychTestR::get_global("counter", state)
-    cur_block <- psychTestR::get_global("block", state)
-    seq_df <- psychTestR::get_global("items", state)
-    item   <- seq_df[counter, ]
+    counter    <- psychTestR::get_global("counter", state)
+    cur_block  <- psychTestR::get_global("block", state)
+    seq_df     <- psychTestR::get_global("items", state)
+    item       <- seq_df[counter, ]
+
+    # Komponist*innen-Namen für diesen Block lesen
+    composer_pairs <- psychTestR::get_global("composer_pairs", state)
+    pair           <- composer_pairs[[cur_block]]   # c(A = "Noa", B = "Sam")
+
     stim_url <- sprintf("%s/%s.mp3", audio_dir, item$file_name)
-    label <- sprintf("q%d_%d", cur_block, counter)
+    label    <- sprintf("q%d_%d", cur_block, counter)
     messagef("[%s] counter: %s", label, counter)
+
     psychTestR::audio_NAFC_page(
       label   = label,
       prompt  = get_prompt(counter, num_items),
       url     = stim_url,
-      choices = c("A", "B"),
+      choices = c("A", "B"),          # intern unverändert
+      labels  = c(pair[["A"]], pair[["B"]]),  # sichtbare Button-Labels
       on_complete = function(answer, state, ...) {
-        #browser()
-        correct     <- as.integer(answer == item$style)
-        results <- psychTestR::get_global("results", state)
-        new_row <-  item %>%
-          mutate(seq_id = counter,
-                 block_no  = cur_block,
-                 answer= answer,
-                 correct = correct)
+        correct    <- as.integer(answer == item$style)
+        results    <- psychTestR::get_global("results", state)
+        new_row    <- item %>%
+          mutate(seq_id   = counter,
+                 block_no = cur_block,
+                 answer   = answer,
+                 correct  = correct)
         psychTestR::set_global("counter", counter + 1, state)
-        psychTestR::set_global("results",
-                   bind_rows(results, new_row),
-                   state)
+        psychTestR::set_global("results", bind_rows(results, new_row), state)
       }
     )
   })
@@ -192,17 +196,27 @@ SLT_item2 <- function(audio_dir = "",
 
 item_feedback_page <- function() {
   psychTestR::reactive_page(function(answer, state, ...) {
-    #browser()
-    results <- psychTestR::get_global("results", state)
-    answer <- results %>% dplyr::slice(nrow(results))
-    if (answer$correct == TRUE) {
-      composer = answer$answer
-      prompt = psychTestR::i18n("CORRECT_A", sub = list(composer = composer))
-    }  else {
-      composer = setdiff(c("A", "B"), answer$answer)
-      prompt = psychTestR::i18n("FALSE_A", sub = list(composer = composer))
+    results        <- psychTestR::get_global("results", state)
+    last           <- results %>% dplyr::slice(nrow(results))
+    cur_block      <- psychTestR::get_global("block", state)
+    composer_pairs <- psychTestR::get_global("composer_pairs", state)
+    pair           <- composer_pairs[[cur_block]]
+
+    if (last$correct == TRUE) {
+      # Richtige Antwort: Name des tatsächlichen Styles
+      composer_name <- pair[[last$answer]]          # pair[["A"]] oder pair[["B"]]
+      prompt <- psychTestR::i18n("CORRECT_COMPOSER",
+                                 sub = list(composer = composer_name))
+    } else {
+      # Falsche Antwort: Name des richtigen Styles
+      correct_style <- last$style                   # "A" oder "B"
+      composer_name <- pair[[correct_style]]
+      prompt <- psychTestR::i18n("FALSE_COMPOSER",
+                                 sub = list(composer = composer_name))
     }
-    psychTestR::one_button_page(body = prompt,
-                                button_text = psychTestR::i18n("CONTINUE"))
+    psychTestR::one_button_page(
+      body        = prompt,
+      button_text = psychTestR::i18n("CONTINUE")
+    )
   })
 }

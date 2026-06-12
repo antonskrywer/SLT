@@ -12,12 +12,9 @@ info_page <- function(id, style = "text-align:justify; margin-left:20%;margin-ri
   )
 }
 
-# ── Demo-Trial-Page: identisch zur Haupttest-Page ──────────────────────────
-# audio_url    : vollständige URL zur MP3
-# correct_style: "A" oder "B" (ground truth für Feedback)
 demo_trial_page <- function(audio_url, correct_style) {
 
-  # 1) Item-Page: audio_NAFC_page mit gleichen Choices wie Haupttest
+  # 1) Item-Page: neutrale Button-Labels
   item <- psychTestR::audio_NAFC_page(
     label   = paste0("demo_", tolower(correct_style)),
     prompt  = shiny::p(
@@ -26,17 +23,18 @@ demo_trial_page <- function(audio_url, correct_style) {
     ),
     url     = audio_url,
     choices = c("A", "B"),
-    save_answer = FALSE          # Demo-Antworten nicht in Ergebnisse
+    labels  = c(psychTestR::i18n("COMPOSER_A"),
+                psychTestR::i18n("COMPOSER_B")),
+    save_answer = FALSE
   )
 
-  # 2) Feedback-Page: liest Antwort aus input, vergleicht mit correct_style
+  # 2) Feedback-Page: nur Richtig/Falsch
   feedback <- psychTestR::reactive_page(function(answer, ...) {
     if (is.null(answer)) answer <- ""
     correct <- (answer == correct_style)
-    composer <- if (correct) answer else correct_style
-    key <- if (correct) "CORRECT_A" else "FALSE_A"
+    key <- if (correct) "DEMO_CORRECT" else "DEMO_FALSE"
     psychTestR::one_button_page(
-      body = psychTestR::i18n(key, sub = list(composer = composer)),
+      body        = psychTestR::i18n(key),
       button_text = psychTestR::i18n("CONTINUE")
     )
   })

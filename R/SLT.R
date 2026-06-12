@@ -32,8 +32,13 @@ SLT <- function(num_items = 20L,
                 feedback = SLT_feedback_with_score(dict = SLT::SLT_dict),
                 dict = SLT::SLT_dict,
                 autoplay = TRUE,
+                composer_pairs = list(          # NEU
+                  c(A = "Noa",  B = "Sam"),
+                  c(A = "Alex", B = "Robin"),
+                  c(A = "Kai",  B = "Mika")
+                ),
                 ...
-          ) {
+) {
   audio_dir <- ifelse(version == 1,
                       "https://s3.eu-west-1.amazonaws.com/media.dots.org/stimuli/SLT/",
                       "https://s3.eu-west-1.amazonaws.com/media.dots.org/stimuli/SLT2/")
@@ -70,6 +75,7 @@ SLT <- function(num_items = 20L,
                  dict = dict,
                  n_start = list(...)$n_start,
                  min_each = list(...)$min_each,
+                 composer_pairs = composer_pairs,   # NEU
                  autoplay = autoplay
       ),
       dict = dict),
