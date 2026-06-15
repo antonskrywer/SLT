@@ -102,7 +102,7 @@ main_test2 <- function(label,
       psychTestR::set_global("block", block + 1, state)
     })
     if (j == 1) {                          # NEU
-      block_elts <- c(block_intro_page(),  # NEU
+      block_elts <- c(block_intro_page(num_items = num_items),  # NEU
                       block_elts)          # NEU
     }                                      # NEU
 
@@ -115,7 +115,7 @@ main_test2 <- function(label,
     }
     elts <- c(elts, block_elts)
     if (j != num_blocks) {
-      elts <- c(elts, break_page(block = j))
+      elts <- c(elts, break_page(block = j, num_items = num_items))
     }
   }
   elts
@@ -175,7 +175,7 @@ SLT_final_page <- function(dict = SLT::SLT_dict){
       )
     ), dict = dict)
 }
-block_intro_page <- function(dict = SLT::SLT_dict) {
+block_intro_page <- function(dict = SLT::SLT_dict, num_items) {
   psychTestR::reactive_page(function(state, ...) {
     composer_pairs <- psychTestR::get_global("composer_pairs", state)
     pair           <- composer_pairs[[1]]   # immer Block 1
@@ -184,7 +184,8 @@ block_intro_page <- function(dict = SLT::SLT_dict) {
         psychTestR::i18n(
           "BLOCK1_INTRO",
           sub = list(composer_a = pair[["A"]],
-                     composer_b = pair[["B"]])
+                     composer_b = pair[["B"]],
+                     num_items = num_items)
         ),
         style = "margin-left:20%;margin-right:20%;width:60%;
                  display:block;text-align:justify"
@@ -193,7 +194,7 @@ block_intro_page <- function(dict = SLT::SLT_dict) {
     )
   })
 }
-break_page <- function(dict = SLT::SLT_dict, block) {
+break_page <- function(dict = SLT::SLT_dict, block, num_items) {
   if (block >= 3) {
     return(NULL)
   }
@@ -206,7 +207,7 @@ break_page <- function(dict = SLT::SLT_dict, block) {
       body = shiny::div(
         psychTestR::i18n(
           sprintf("BREAK_PAGE%d", block),
-          sub = list(composer_a = name_a, composer_b = name_b)
+          sub = list(composer_a = name_a, composer_b = name_b, num_items = num_items)
         ),
         style = "margin-left:0%;display:block;text-align:justify;width:60%"
       ),
