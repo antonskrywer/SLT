@@ -71,8 +71,8 @@ main_test2 <- function(label,
                        n_start = 6,
                        min_each = 2,
                        composer_pairs = list(
-                         c(A = "Noa",  B = "Sam"),
-                         c(A = "Alex", B = "Robin"),
+                         c(A = "Noa",  B = "Taylor"),
+                         c(A = "Alex", B = "Luca"),
                          c(A = "Kai",  B = "Mika")
                        ),
                        autoplay = TRUE, ...) {

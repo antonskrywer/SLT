@@ -167,7 +167,7 @@ SLT_item2 <- function(audio_dir = "",
 
     # Komponist*innen-Namen für diesen Block lesen
     composer_pairs <- psychTestR::get_global("composer_pairs", state)
-    pair           <- composer_pairs[[cur_block]]   # c(A = "Noa", B = "Sam")
+    pair           <- composer_pairs[[cur_block]]   # c(A = "Noa", B = "Taylor")
 
     stim_url <- sprintf("%s/%s.mp3", audio_dir, item$file_name)
     label    <- sprintf("q%d_%d", cur_block, counter)

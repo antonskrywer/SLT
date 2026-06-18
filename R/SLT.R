@@ -36,8 +36,8 @@ SLT <- function(num_items = 20L,
                 dict = SLT::SLT_dict,
                 autoplay = TRUE,
                 composer_pairs = list(          # NEU
-                  c(A = "Noa",  B = "Sam"),
-                  c(A = "Alex", B = "Robin"),
+                  c(A = "Noa",  B = "Taylor"),
+                  c(A = "Alex", B = "Luca"),
                   c(A = "Kai",  B = "Mika")
                 ),
                 ...
