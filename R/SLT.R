@@ -1,5 +1,8 @@
 #printf   <- function(...) print(sprintf(...))
 #messagef <- function(...) message(sprintf(...))
+null_or_else <- function(x, default) {
+  if (is.nu..(x)) default else x
+}
 #' SLT
 #'
 #' This function defines a SLT  module for incorporation into a
@@ -73,8 +76,8 @@ SLT <- function(num_items = 20L,
                  num_items = num_items,
                  audio_dir = audio_dir,
                  dict = dict,
-                 n_start = list(...)$n_start,
-                 min_each = list(...)$min_each,
+                 n_start = null_or_else(list(...)$n_start, 6),
+                 min_each = null_or_else(list(...)$min_each, 2),
                  composer_pairs = composer_pairs,   # NEU
                  autoplay = autoplay
       ),

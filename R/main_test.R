@@ -63,23 +63,26 @@ main_test <- function(label,
   elts
 }
 
+### GEÄNDERT START — main_test2() umgestellt von c() auf list() + psychTestR::join() ###
 main_test2 <- function(label,
                        num_items,
                        audio_dir,
                        dict = SLT::SLT_dict,
                        n_start = 6,
                        min_each = 2,
-                       composer_pairs = list(        # NEU — Default-Werte
+                       composer_pairs = list(
                          c(A = "Noa",  B = "Sam"),
                          c(A = "Alex", B = "Robin"),
                          c(A = "Kai",  B = "Mika")
                        ),
                        autoplay = TRUE, ...) {
-  elts <- psychTestR::code_block(function(state, ...) {
-    psychTestR::set_global("block", 0, state)
-    psychTestR::set_global("results", data.frame(), state)
-    psychTestR::set_global("composer_pairs", composer_pairs, state)  # NEU
-  })
+  elts_list <- list(
+    psychTestR::code_block(function(state, ...) {
+      psychTestR::set_global("block", 0, state)
+      psychTestR::set_global("results", data.frame(), state)
+      psychTestR::set_global("composer_pairs", composer_pairs, state)
+    })
+  )
 
   item_bank <- SLT::SLT_item_bank2
   num_blocks <- 3
@@ -87,39 +90,52 @@ main_test2 <- function(label,
   for (j in 1:num_blocks) {
     #item_sequence <- sample(1:max(item_bank$item_number), num_items)
 
-    block_elts <- psychTestR::code_block(function(state, ...) {
-      #browser()
-      block <- psychTestR::get_global("block", state)
-      seq_df <- get_items(
-        difficulty =  difficulties[block + 1],
-        num_items = num_items,
-        n_start   = n_start,
-        min_each  = min_each
+    local({
+      j <- j  # explizit einfangen (Closure-Falle bei for-Loops)
+
+      block_elts_list <- list(
+        psychTestR::code_block(function(state, ...) {
+          #browser()
+          block <- psychTestR::get_global("block", state)
+          seq_df <- get_items(
+            difficulty =  difficulties[block + 1],
+            num_items = num_items,
+            n_start   = n_start,
+            min_each  = min_each
+          )
+
+          psychTestR::set_global("items", seq_df, state)
+          psychTestR::set_global("counter", 1, state)
+          psychTestR::set_global("block", block + 1, state)
+        })
       )
 
-      psychTestR::set_global("items", seq_df, state)
-      psychTestR::set_global("counter", 1, state)
-      psychTestR::set_global("block", block + 1, state)
-    })
-    if (j == 1) {                          # NEU
-      block_elts <- c(block_intro_page(num_items = num_items),  # NEU
-                      block_elts)          # NEU
-    }                                      # NEU
+      ### GEÄNDERT START — append() statt c() für sicheres Voranstellen ###
+      if (j == 1) {
+        block_elts_list <- append(block_elts_list,
+                                  list(block_intro_page(num_items = num_items)),
+                                  after = 0)
+      }
+      ### GEÄNDERT ENDE ###
 
-    for (i in 1:num_items) {
-      messagef("Adding item %d from block %d", i, j)
-      item_page <- SLT_item2(audio_dir = audio_dir,
-                             save_answer = TRUE,
-                             autoplay = autoplay)
-      block_elts <- c(block_elts, item_page, item_feedback_page())
-    }
-    elts <- c(elts, block_elts)
-    if (j != num_blocks) {
-      elts <- c(elts, break_page(block = j, num_items = num_items))
-    }
+      for (i in 1:num_items) {
+        messagef("Adding item %d from block %d", i, j)
+        item_page <- SLT_item2(audio_dir = audio_dir,
+                               save_answer = TRUE,
+                               autoplay = autoplay)
+        block_elts_list[[length(block_elts_list) + 1]] <- item_page
+        block_elts_list[[length(block_elts_list) + 1]] <- item_feedback_page()
+      }
+
+      elts_list <<- c(elts_list, psychTestR::join(block_elts_list))
+      if (j != num_blocks) {
+        elts_list <<- c(elts_list, list(break_page(block = j, num_items = num_items)))
+      }
+    })
   }
-  elts
+  psychTestR::join(elts_list)
 }
+### GEÄNDERT ENDE ###
 
 
 
