@@ -15,8 +15,8 @@ SLT(
   feedback = SLT_feedback_with_score(dict = SLT::SLT_dict),
   dict = SLT::SLT_dict,
   autoplay = TRUE,
-  composer_pairs = list(c(A = "Noa", B = "Taylor"), c(A = "Alex", B = "Luca"), c(A = "Kai",
-    B = "Mika")),
+  composer_pairs = list(c(A = "Noa", B = "Taylor"), c(A = "Alex", B = "Luca"), c(A =
+    "Kai", B = "Mika")),
   ...
 )
 }
