@@ -34,23 +34,23 @@ null_or_else <- function(x, default){
 #' @export
 
 SLT_standalone  <- function(title = NULL,
-                           num_items = 24L,
-                           num_blocks = 3,
-                           with_id = FALSE,
-                           with_feedback = FALSE,
-                           with_welcome = TRUE,
-                           version = 1,
-                           admin_password = "conifer",
-                           researcher_email = "anton.schreiber@uni-hamburg.de",
-                           languages = c("en", "de", "de_f"),
-                           dict = SLT::SLT_dict,
-                           validate_id = "auto",
-                           take_training = FALSE,
-                           autoplay = TRUE,
-                           ...) {
+                            num_items = 24L,
+                            num_blocks = 3,
+                            with_id = FALSE,
+                            with_feedback = FALSE,
+                            with_welcome = TRUE,
+                            version = 1,
+                            admin_password = "conifer",
+                            researcher_email = "anton.schreiber@uni-hamburg.de",
+                            languages = c("en", "de", "de_f"),
+                            dict = SLT::SLT_dict,
+                            validate_id = "auto",
+                            take_training = FALSE,
+                            autoplay = TRUE,
+                            fixed_blocks = NULL,    ### GEÄNDERT — neuer Parameter
+                            ...) {
   feedback <- NULL
   if(with_feedback) {
-    #feedback <- SLT::SLT_feedback_with_graph()
     feedback <- SLT::SLT_feedback_with_score()
   }
   elts <- psychTestR::join(
@@ -72,6 +72,7 @@ SLT_standalone  <- function(title = NULL,
                take_training = TRUE,
                version = version,
                autoplay = autoplay,
+               fixed_blocks = fixed_blocks,   ### GEÄNDERT
                ...)
     else
       SLT::SLT(num_items = num_items,
@@ -84,17 +85,16 @@ SLT_standalone  <- function(title = NULL,
                n_start = null_or_else(list(...)$n_start, 6),
                min_each = null_or_else(list(...)$min_each, 2),
                autoplay = autoplay,
+               fixed_blocks = fixed_blocks,   ### GEÄNDERT
                ...),
     psychTestR::elt_save_results_to_disk(complete = TRUE),
     psychTestR::code_block(function(state, ...){
       res <- psychTestR::get_results(state, complete = T) %>% as.list()
-      #browser()
     }),
     SLT_final_page(dict = dict)
   )
 
   if (is.null(title)) {
-    #extract title as named vector from dictionary
     title <-
       SLT::SLT_dict  %>%
       as.data.frame() %>%

@@ -35,11 +35,12 @@ SLT <- function(num_items = 20L,
                 feedback = SLT_feedback_with_score(dict = SLT::SLT_dict),
                 dict = SLT::SLT_dict,
                 autoplay = TRUE,
-                composer_pairs = list(          # NEU
+                composer_pairs = list(
                   c(A = "Noa",  B = "Taylor"),
                   c(A = "Alex", B = "Luca"),
                   c(A = "Kai",  B = "Mika")
                 ),
+                fixed_blocks = NULL,   ### GEÄNDERT — neuer Parameter
                 ...
 ) {
   audio_dir <- ifelse(version == 1,
@@ -52,11 +53,14 @@ SLT <- function(num_items = 20L,
               is.list(feedback) ||
               psychTestR::is.test_element(feedback) ||
               is.null(feedback))
+
+  ### GEÄNDERT START — Warnung, falls fixed_blocks mit falscher Version kombiniert wird ###
+  if (!is.null(fixed_blocks) && version != 2) {
+    stop("fixed_blocks wird nur von version = 2 (main_test2) unterstuetzt.")
+  }
+  ### GEÄNDERT ENDE ###
+
   audio_dir <- gsub("/$", "", audio_dir)
-  # if(!is.null(feedback)){
-  #   feedback <- feedback(dict = dict)
-  # }
-  #browser()
   psychTestR::join(
     psychTestR::begin_module(label),
     if (with_welcome) SLT_welcome_page(),
@@ -69,8 +73,8 @@ SLT <- function(num_items = 20L,
                 audio_dir = audio_dir,
                 dict = dict,
                 autoplay = autoplay
-                ),
-                dict = dict),
+      ),
+      dict = dict),
     if(version == 2) psychTestR::new_timeline(
       main_test2(label = label,
                  num_items = num_items,
@@ -78,7 +82,8 @@ SLT <- function(num_items = 20L,
                  dict = dict,
                  n_start = null_or_else(list(...)$n_start, 6),
                  min_each = null_or_else(list(...)$min_each, 2),
-                 composer_pairs = composer_pairs,   # NEU
+                 composer_pairs = composer_pairs,
+                 fixed_blocks = fixed_blocks,   ### GEÄNDERT
                  autoplay = autoplay
       ),
       dict = dict),
@@ -87,7 +92,6 @@ SLT <- function(num_items = 20L,
     feedback,
     psychTestR::code_block(function(state, ...){
       res <- psychTestR::get_results(state, complete = T, add_session_info = T) %>% as.list()
-      #browser()
     }),
     if(with_finish) SLT_finished_page(),
     psychTestR::end_module())

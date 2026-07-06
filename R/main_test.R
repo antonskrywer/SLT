@@ -63,7 +63,7 @@ main_test <- function(label,
   elts
 }
 
-### GEÄNDERT START — main_test2() umgestellt von c() auf list() + psychTestR::join() ###
+### GEÄNDERT START — fixed_blocks Parameter, dynamisches num_blocks ###
 main_test2 <- function(label,
                        num_items,
                        audio_dir,
@@ -75,7 +75,17 @@ main_test2 <- function(label,
                          c(A = "Alex", B = "Luca"),
                          c(A = "Kai",  B = "Mika")
                        ),
-                       autoplay = TRUE, ...) {
+                       autoplay = TRUE,
+                       fixed_blocks = NULL,
+                       ...) {
+
+  num_blocks <- if (!is.null(fixed_blocks)) length(fixed_blocks) else 3
+  difficulties <- c("easy", "medium", "hard")
+
+  stopifnot(length(composer_pairs) >= num_blocks)
+  composer_pairs <- composer_pairs[seq_len(num_blocks)]
+  ### GEÄNDERT ENDE ###
+
   elts_list <- list(
     psychTestR::code_block(function(state, ...) {
       psychTestR::set_global("block", 0, state)
@@ -85,24 +95,33 @@ main_test2 <- function(label,
   )
 
   item_bank <- SLT::SLT_item_bank2
-  num_blocks <- 3
-  difficulties <- c("easy", "medium", "hard")
+
   for (j in 1:num_blocks) {
-    #item_sequence <- sample(1:max(item_bank$item_number), num_items)
 
     local({
       j <- j  # explizit einfangen (Closure-Falle bei for-Loops)
 
       block_elts_list <- list(
         psychTestR::code_block(function(state, ...) {
-          #browser()
           block <- psychTestR::get_global("block", state)
-          seq_df <- get_items(
-            difficulty =  difficulties[block + 1],
-            num_items = num_items,
-            n_start   = n_start,
-            min_each  = min_each
-          )
+
+          ### GEÄNDERT START — feste Block-ID statt Difficulty, falls fixed_blocks gesetzt ###
+          seq_df <- if (!is.null(fixed_blocks)) {
+            get_items(
+              block_id  = fixed_blocks[block + 1],
+              num_items = num_items,
+              n_start   = n_start,
+              min_each  = min_each
+            )
+          } else {
+            get_items(
+              difficulty = difficulties[block + 1],
+              num_items  = num_items,
+              n_start    = n_start,
+              min_each   = min_each
+            )
+          }
+          ### GEÄNDERT ENDE ###
 
           psychTestR::set_global("items", seq_df, state)
           psychTestR::set_global("counter", 1, state)
@@ -110,13 +129,11 @@ main_test2 <- function(label,
         })
       )
 
-      ### GEÄNDERT START — append() statt c() für sicheres Voranstellen ###
       if (j == 1) {
         block_elts_list <- append(block_elts_list,
                                   list(block_intro_page(num_items = num_items)),
                                   after = 0)
       }
-      ### GEÄNDERT ENDE ###
 
       for (i in 1:num_items) {
         messagef("Adding item %d from block %d", i, j)
@@ -135,7 +152,6 @@ main_test2 <- function(label,
   }
   psychTestR::join(elts_list)
 }
-### GEÄNDERT ENDE ###
 
 
 
@@ -260,15 +276,21 @@ false_b <- function(dict = SLT::SLT_dict){
       button_text = psychTestR::i18n("CONTINUE")
     ), dict = dict)
 }
+### GEÄNDERT START — neuer Parameter block_id, umgeht Difficulty-Zufallsziehung ###
 get_items <- function(difficulty = c("easy", "medium", "hard"),
                       num_items = 24,
                       n_start   = 6,
                       min_each  = 2,
-                      seed      = NULL) {
+                      seed      = NULL,
+                      block_id  = NULL) {
 
   if (!is.null(seed)) set.seed(seed)
-  difficulty <- match.arg(difficulty)
-  block_id <- SLT::SLT_item_bank2 %>% filter(difficulty == !!difficulty) %>% pull(block) %>% sample(1)
+
+  if (is.null(block_id)) {
+    difficulty <- match.arg(difficulty)
+    block_id <- SLT::SLT_item_bank2 %>% filter(difficulty == !!difficulty) %>% pull(block) %>% sample(1)
+  }
+  ### GEÄNDERT ENDE ###
   pool <- SLT::SLT_item_bank2 %>% filter(block == block_id)
   if(num_items == 2){
     itemA <- pool %>% filter(style == "A") %>% dplyr::sample_n(1)
