@@ -13,6 +13,7 @@ null_or_else <- function(x, default){
 #' This can be used for data collection, either in the laboratory or online.
 #' @param title (Scalar character) Title to display during testing.
 #' @param num_items (Scalar integer) Number of items to be adminstered.
+#'   Default NULL: wird versionsabhaengig aufgeloest (24 fuer v1/2, 50 fuer v3/4).
 #' @param with_id (Scalar boolean) Indicates, if ID should be asked for. Defaults to TRUE
 #' @param with_feedback (Scalar boolean) Indicates if performance feedback will be given at the end of the test. Defaults to  FALSE
 #' @param with_welcome (Scalar boolean) Indicates, if a welcome page shall be displayed.  Defaults to  TRUE
@@ -34,7 +35,7 @@ null_or_else <- function(x, default){
 #' @export
 
 SLT_standalone  <- function(title = NULL,
-                            num_items = 24L,
+                            num_items = NULL,
                             num_blocks = 3,
                             with_id = FALSE,
                             with_feedback = FALSE,
@@ -47,10 +48,20 @@ SLT_standalone  <- function(title = NULL,
                             validate_id = "auto",
                             take_training = FALSE,
                             autoplay = TRUE,
-                            fixed_blocks = NULL,    ### GEÄNDERT — neuer Parameter
                             ...) {
+  ### GEÄNDERT START — num_items-Default abhaengig von version ###
+  # Fuer version 1/2 bleibt der bisherige Default (24). Fuer version 3/4
+  # bleibt num_items = NULL, sofern nicht explizit gesetzt - SLT()/
+  # main_test3() ermitteln die tatsaechliche Poolgroesse dann automatisch
+  # aus SLT_item_bank3 (Reber = 36, Loui = 50).
+  if (is.null(num_items) && !(version %in% c(3, 4))) {
+    num_items <- 24L
+  }
+  ### GEÄNDERT ENDE ###
+
   feedback <- NULL
   if(with_feedback) {
+    #feedback <- SLT::SLT_feedback_with_graph()
     feedback <- SLT::SLT_feedback_with_score()
   }
   elts <- psychTestR::join(
@@ -72,7 +83,6 @@ SLT_standalone  <- function(title = NULL,
                take_training = TRUE,
                version = version,
                autoplay = autoplay,
-               fixed_blocks = fixed_blocks,   ### GEÄNDERT
                ...)
     else
       SLT::SLT(num_items = num_items,
@@ -85,16 +95,17 @@ SLT_standalone  <- function(title = NULL,
                n_start = null_or_else(list(...)$n_start, 6),
                min_each = null_or_else(list(...)$min_each, 2),
                autoplay = autoplay,
-               fixed_blocks = fixed_blocks,   ### GEÄNDERT
                ...),
     psychTestR::elt_save_results_to_disk(complete = TRUE),
     psychTestR::code_block(function(state, ...){
       res <- psychTestR::get_results(state, complete = T) %>% as.list()
+      #browser()
     }),
     SLT_final_page(dict = dict)
   )
 
   if (is.null(title)) {
+    #extract title as named vector from dictionary
     title <-
       SLT::SLT_dict  %>%
       as.data.frame() %>%

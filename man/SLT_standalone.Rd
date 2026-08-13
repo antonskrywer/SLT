@@ -6,7 +6,7 @@
 \usage{
 SLT_standalone(
   title = NULL,
-  num_items = 24L,
+  num_items = NULL,
   num_blocks = 3,
   with_id = FALSE,
   with_feedback = FALSE,
@@ -25,7 +25,8 @@ SLT_standalone(
 \arguments{
 \item{title}{(Scalar character) Title to display during testing.}
 
-\item{num_items}{(Scalar integer) Number of items to be adminstered.}
+\item{num_items}{(Scalar integer) Number of items to be adminstered.
+Default NULL: wird versionsabhaengig aufgeloest (24 fuer v1/2, 50 fuer v3/4).}
 
 \item{with_id}{(Scalar boolean) Indicates, if ID should be asked for. Defaults to TRUE}
 

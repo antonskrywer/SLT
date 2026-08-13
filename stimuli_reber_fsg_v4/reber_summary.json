@@ -1,0 +1,10 @@
+{
+  "grammar_type": "reber_fsg",
+  "melody_length": 10,
+  "n_per_style": 18,
+  "n_total_valid_strings_at_length": 36,
+  "max_similarity_within_style_A": 0.6,
+  "similarity_threshold_used": 0.7,
+  "mean_shuffle_attempts_for_valid_control": 1,
+  "ideal_observer_acc": 1
+}

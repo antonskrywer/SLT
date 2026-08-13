@@ -15,13 +15,14 @@ SLT(
   feedback = SLT_feedback_with_score(dict = SLT::SLT_dict),
   dict = SLT::SLT_dict,
   autoplay = TRUE,
-  composer_pairs = list(c(A = "Noa", B = "Taylor"), c(A = "Alex", B = "Luca"), c(A =
-    "Kai", B = "Mika")),
+  composer_pairs = NULL,
   ...
 )
 }
 \arguments{
-\item{num_items}{(Integer scalar) Number of items in the test.}
+\item{num_items}{(Integer scalar) Number of items in the test.
+Fuer version 3/4 wird dieser Wert immer auf 50 gesetzt (25 pro
+Grammatik-Typ); ein abweichender Wert erzeugt eine Warnung.}
 
 \item{with_welcome}{(Scalar boolean) Indicates, if a welcome page shall be displayed. Defaults to TRUE}
 
@@ -31,22 +32,22 @@ SLT(
 
 \item{label}{(Character scalar) Label to give the SLT results in the output file.}
 
+\item{version}{(Integer scalar) 1 = Markov (Block-Design), 2 = Markov
+gamifiziert (Easy/Medium/Hard-Bloecke), 3 = Reber-FSG (deterministisch),
+4 = Loui-FSG (deterministisch, Bohlen-Pierce)}
+
 \item{feedback}{(Function) Defines the feedback to give the participant
 at the end of the test.}
 
 \item{dict}{The psychTestR dictionary used for internationalisation.}
 
 \item{autoplay}{(Scalar boolean) Indicates whether you want to have autoplay for item pages (instruction pages always not-autoplay)}
+
+\item{composer_pairs}{(List) Composer-Namenspaare pro Block. Bei
+version 3/4 wird automatisch EIN Paar (Noa/Sam) verwendet, falls
+NULL uebergeben wird (Default).}
 }
 \description{
 This function defines a SLT  module for incorporation into a
 psychTestR timeline.
-Use this function if you want to include the SLT in a
-battery of other tests, or if you want to add custom psychTestR
-pages to your test timeline.
-}
-\details{
-For demoing the SLT, consider using \code{\link{SLT_demo}()}.
-For a standalone implementation of the SLT,
-consider using \code{\link{SLT_standalone}()}.
 }

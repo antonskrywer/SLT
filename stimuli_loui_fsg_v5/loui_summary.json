@@ -1,0 +1,9 @@
+{
+  "grammar_type": "loui_fsg",
+  "melody_length": 10,
+  "n_per_style": 25,
+  "scale": "Bohlen-Pierce",
+  "max_similarity_within_style_A": 0.6,
+  "mean_shuffle_attempts_for_valid_control": 25.52,
+  "ideal_observer_acc": 1
+}
