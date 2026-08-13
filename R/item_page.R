@@ -245,9 +245,10 @@ SLT_item2 <- function(audio_dir = "",
       get_answer = get_answer_rt,
       save_answer = save_answer,
       autoplay = autoplay,
+      ### GEÄNDERT START — correct-Spalten-Kollision mit Item-Bank behoben ###
       on_complete = function(answer, state, ...) {
         ans_value      <- answer$answer
-        correct        <- as.integer(ans_value == item$style)
+        is_correct     <- as.integer(ans_value == item$style)
         rt_decision_ms <- answer$rt_decision_ms
         rt_total_ms    <- answer$rt_total_ms
         results        <- psychTestR::get_global("results", state)
@@ -255,12 +256,13 @@ SLT_item2 <- function(audio_dir = "",
           mutate(seq_id   = counter,
                  block_no = cur_block,
                  answer   = ans_value,
-                 correct  = correct,
+                 correct  = is_correct,
                  rt_decision_ms = rt_decision_ms,
                  rt_total_ms    = rt_total_ms)
         psychTestR::set_global("counter", counter + 1, state)
         psychTestR::set_global("results", bind_rows(results, new_row), state)
       }
+      ### GEÄNDERT ENDE ###
     )
   })
 }
