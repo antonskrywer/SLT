@@ -1,7 +1,15 @@
-# Musical Emotion Discrimination Test (SLT)
+# Statistical Learning Test (SLT)
 
+The SLT package implements the Statistical Learning Test, a musical statistical-learning task in which participants classify short melodies generated from artificial grammars. Melodies are presented in pairs of "styles" (grammatical vs. non-grammatical/scrambled), and participants learn to tell them apart over the course of the test.
 
-The SLT package contains the adaptive Musical Emotion Discrimination Test (aMSLT), an adaptive test for recognition of emotional interpretation of simple melodies. It also contains also an non-adaptive version (sMSLT) which can still be used, but we highly encourage to use the adaptive version.
+The package currently supports four stimulus versions, selected via the `version` argument to `SLT()` / `SLT_standalone()`:
+
+- **version 1** — original Markov-chain grammar, fixed block design (`SLT_item_bank`)
+- **version 2** — Markov-chain grammar, gamified with composer-name pairs and Easy/Medium/Hard difficulty blocks (`SLT_item_bank2`)
+- **version 3** — deterministic Reber finite-state grammar (`SLT_item_bank3`, `grammar_type == "reber_fsg"`, 36 items)
+- **version 4** — deterministic Loui finite-state grammar on a Bohlen-Pierce scale (`SLT_item_bank3`, `grammar_type == "loui_fsg"`, 50 items)
+
+Versions 3 and 4 record per-trial reaction times (`rt_decision_ms`, `rt_total_ms`) in addition to accuracy.
 
 
 ## Citation
@@ -53,7 +61,7 @@ SLT_demo(num_items = 5, language = "en")
 ### Testing a participant
 
 The `SLT_standalone()` function is designed for real data collection.
-In particular, the participant doesn't receive feedback during this version. Per default, the aMSLT is used. Setting the parameter `adaptive` to `FALSE` will run the  static version (sMSLT).
+By default, feedback is disabled (`with_feedback = FALSE`). Use the `version` argument to select the stimulus set (1–4, see above).
 
 ``` r
 # Load the SLT package
@@ -61,8 +69,7 @@ library(SLT)
 
 # Run the test as if for a participant, using default settings,
 # saving data, and with a custom admin password
-# set adaptive = FALSE for static version
-SLT_standalone(admin_password = "put-your-password-here", adaptive = TRUE) 
+SLT_standalone(admin_password = "put-your-password-here", version = 3)
 ```
 
 You will need to enter a participant ID for each participant.
@@ -124,12 +131,7 @@ where `shiny` is the username for the Shiny process user
 
 ## Implementation notes
 
-By default, the adaptive SLT  implementation always estimates participant abilities
-using weighted-likelihood estimation.
-We adopt weighted-likelihood estimation for this release 
-because this technique makes fewer assumptions about the participant group being tested.
-This makes the test better suited to testing with diverse participant groups
-(e.g., children, clinical populations). The static version runs just a fixed sequence of 18 stimuli. Note that the output format of the adaptive and static variants will look rather differently.
+Versions 1 and 2 present items in a fixed block design (with composer-name pairs per block in v2). Versions 3 and 4 present the entire item pool for a single grammar type (Reber or Loui) per session, in randomized order (with a constraint that the first few trials contain both styles), and additionally record per-trial reaction times.
 
 ## Usage notes
 

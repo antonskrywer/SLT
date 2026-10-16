@@ -15,7 +15,8 @@ null_or_else <- function(x, default) {
 #' @param label (Character scalar) Label to give the SLT results in the output file.
 #' @param version (Integer scalar) 1 = Markov (Block-Design), 2 = Markov
 #'   gamifiziert (Easy/Medium/Hard-Bloecke), 3 = Reber-FSG (deterministisch),
-#'   4 = Loui-FSG (deterministisch, Bohlen-Pierce)
+#'   4 = Loui-FSG (deterministisch, Bohlen-Pierce), 5 = Pilot 2026 (passive
+#'   Exposition + A-not-A + Probeton, siehe main_test5())
 #' @param feedback (Function) Defines the feedback to give the participant
 #' at the end of the test.
 #' @param dict The psychTestR dictionary used for internationalisation.
@@ -23,6 +24,9 @@ null_or_else <- function(x, default) {
 #' @param composer_pairs (List) Composer-Namenspaare pro Block. Bei
 #'   version 3/4 wird automatisch EIN Paar (Noa/Sam) verwendet, falls
 #'   NULL uebergeben wird (Default).
+#' @param with_halt (Scalar boolean) Nur version 5: HALT-Kopfhoerer-Check vor
+#'   dem Test (sofortiger Abbruch bei Nichtbestehen). Fuer Online-Studien
+#'   (Prolific) TRUE, fuer begleitete/private Erhebungen FALSE. Defaults to TRUE.
 #' @export
 
 SLT <- function(num_items = 20L,
@@ -36,6 +40,7 @@ SLT <- function(num_items = 20L,
                 dict = SLT::SLT_dict,
                 autoplay = TRUE,
                 composer_pairs = NULL,
+                with_halt = TRUE,
                 ...
 ) {
   ### GEÄNDERT START — audio_dir je Version (inkl. v3 Reber / v4 Loui) ###
@@ -45,8 +50,13 @@ SLT <- function(num_items = 20L,
     "2" = "https://s3.eu-west-1.amazonaws.com/media.dots.org/stimuli/SLT2/",
     "3" = "https://s3.eu-west-1.amazonaws.com/media.dots.org/stimuli/SLT3/",
     "4" = "https://s3.eu-west-1.amazonaws.com/media.dots.org/stimuli/SLT4/",
-    stop(sprintf("SLT: unbekannte version = %s (erlaubt: 1, 2, 3, 4)", version))
+    "5" = "https://s3.eu-west-1.amazonaws.com/media.dots.org/stimuli/SLT5/",
+    stop(sprintf("SLT: unbekannte version = %s (erlaubt: 1, 2, 3, 4, 5)", version))
   )
+  # v5 (Pilot 2026): eigene Begruessung/Instruktionen in main_test5(), kein
+  # Score-Feedback (Auswertung offline mit slt5_pilot_analysis.R)
+  is_v5 <- as.character(version) == "5"
+  if (is_v5) feedback <- NULL
   ### GEÄNDERT ENDE ###
 
   ### GEÄNDERT START — grammar_type einmalig ermitteln (fuer instructions() und main_test3()) ###
@@ -100,10 +110,14 @@ SLT <- function(num_items = 20L,
   audio_dir <- gsub("/$", "", audio_dir)
 
   psychTestR::join(
+    # v5: Begruessung und HALT-Kopfhoerer-Check vor dem SLT-Modul (HALT bringt
+    # eigenes Modul + Dictionary mit; Module lassen sich nicht verschachteln)
+    if (is_v5 && with_welcome) psychTestR::new_timeline(SLT5_welcome_pages(), dict = dict),
+    if (is_v5 && with_halt) SLT5_halt(dict = dict, screenout_code = list(...)$prolific_screenout_code),
     psychTestR::begin_module(label),
-    if (with_welcome) SLT_welcome_page(),
+    if (with_welcome && !is_v5) SLT_welcome_page(),
     ### GEÄNDERT START — version/grammar_type an instructions() uebergeben ###
-    if (take_training) psychTestR::new_timeline(
+    if (take_training && !is_v5) psychTestR::new_timeline(
       instructions(audio_dir, version = version, grammar_type = grammar_type),
       dict = dict),
     ### GEÄNDERT ENDE ###
@@ -141,7 +155,16 @@ SLT <- function(num_items = 20L,
       ),
       dict = dict),
     ### GEÄNDERT ENDE ###
-    scoring(),
+    if (is_v5) psychTestR::new_timeline(
+      main_test5(label = label,
+                 audio_dir = audio_dir,
+                 dict = dict,
+                 autoplay = autoplay,
+                 with_halt = with_halt,
+                 dev_skip = null_or_else(list(...)$dev_skip, character()),
+                 prolific_completion_code = list(...)$prolific_completion_code),
+      dict = dict),
+    if (!is_v5) scoring(),
     psychTestR::elt_save_results_to_disk(complete = TRUE),
     feedback,
     psychTestR::code_block(function(state, ...){

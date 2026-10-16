@@ -25,3 +25,23 @@
 #' @name SLT_item_bank3
 #' @docType data
 NULL
+
+#' SLT5 items (SLT version 5, Pilot 2026)
+#'
+#' Material fuer SLT version = 5 (passive Exposition + A-not-A + Probeton).
+#' Erzeugt mit den Skripten in SLT_analysis_and_publications/slt5_pilot/ und
+#' zusammengefasst mit data_raw/compile_item_bank5.R. Audio liegt unter
+#' https://s3.eu-west-1.amazonaws.com/media.dots.org/stimuli/SLT5/.
+#'
+#' @format Eine Liste mit den Data Frames:
+#' \describe{
+#'   \item{anota}{48 A-not-A-Items (24 G1 / 24 G2, 4 E-Stufen)}
+#'   \item{probe}{30 Probeton-Aufgaben (TP unter G1/G2, normal und leicht)}
+#'   \item{practice}{2 A-not-A- und 1 Probeton-Uebung (in G1 und G2 gleich gueltig)}
+#'   \item{pitch_check}{3 Tonhoehen-Aufgaben (Ganzton, "hoeher"/"tiefer"; Kriterium 3/3)}
+#'   \item{exposure}{16 Expositionsbloecke (Schwierigkeit x Grammatik x Block) mit Anzahl Oddballs}
+#' }
+#' In allen Tabellen ist \code{file_name} der Pfad relativ zu audio_dir, ohne ".mp3".
+#' @name SLT5_items
+#' @docType data
+NULL

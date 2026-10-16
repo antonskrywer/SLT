@@ -1,5 +1,4 @@
 #source("R/SLT.R")
-options(shiny.error = browser)
 debug_locally <- !grepl("shiny-server", getwd())
 
 null_or_else <- function(x, default){

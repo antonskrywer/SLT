@@ -18,10 +18,12 @@ Imports:
     tidyverse (>= 1.2.1),
     dplyr,
     purrr,
-    tibble
+    tibble,
+    HALT
 Suggests:
     codetools,
     devtools (>= 1.13.6)
 Remotes: 
-    pmcharrison/psychTestR
+    pmcharrison/psychTestR,
+    KilianSander/HALT
 RoxygenNote: 7.3.3

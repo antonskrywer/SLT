@@ -16,6 +16,7 @@ SLT(
   dict = SLT::SLT_dict,
   autoplay = TRUE,
   composer_pairs = NULL,
+  with_halt = TRUE,
   ...
 )
 }
@@ -34,7 +35,8 @@ Grammatik-Typ); ein abweichender Wert erzeugt eine Warnung.}
 
 \item{version}{(Integer scalar) 1 = Markov (Block-Design), 2 = Markov
 gamifiziert (Easy/Medium/Hard-Bloecke), 3 = Reber-FSG (deterministisch),
-4 = Loui-FSG (deterministisch, Bohlen-Pierce)}
+4 = Loui-FSG (deterministisch, Bohlen-Pierce), 5 = Pilot 2026 (passive
+Exposition + A-not-A + Probeton, siehe main_test5())}
 
 \item{feedback}{(Function) Defines the feedback to give the participant
 at the end of the test.}
@@ -46,6 +48,10 @@ at the end of the test.}
 \item{composer_pairs}{(List) Composer-Namenspaare pro Block. Bei
 version 3/4 wird automatisch EIN Paar (Noa/Sam) verwendet, falls
 NULL uebergeben wird (Default).}
+
+\item{with_halt}{(Scalar boolean) Nur version 5: HALT-Kopfhoerer-Check vor
+dem Test (sofortiger Abbruch bei Nichtbestehen). Fuer Online-Studien
+(Prolific) TRUE, fuer begleitete/private Erhebungen FALSE. Defaults to TRUE.}
 }
 \description{
 This function defines a SLT  module for incorporation into a
