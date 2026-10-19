@@ -77,23 +77,67 @@ SLT5_welcome_pages <- function() {
 
 # HALT-Kopfhoerer-Check (Entscheidungen 2026-10-15, Anton): ohne Frequenztest,
 # angenommene Kopfhoerer-Quote 70 % (Prolific mit Kopfhoerer-Pflicht), bei
-# Nichtbestehen sofortiger Abbruch (HALT-Stopp-Seite, devices_exclude = TRUE).
+# Nichtbestehen sofortiger Abbruch.
 # Laeuft VOR der Zellenzuteilung -> Ausgeschlossene belegen keine Zelle.
 #
-# Der Abbruch passiert NICHT in HALT selbst: HALT_stop_page() (HALT 0.12.4)
-# speichert die Ergebnisse nicht (elt_save_results_to_disk() steckt wirkungslos
-# in einem code_block) und bietet keine Prolific-Rueckleitung. Deshalb laufen
-# HALT-Ausschluesse aus (devices_exclude/lr_audio_exclude = FALSE) und danach
-# entscheidet SLT5_halt_passed() anhand von HALT.device_screening$correct.
+# HALT_stop_page() (HALT 0.12.4) speichert die Ergebnisse nicht
+# (elt_save_results_to_disk() steckt wirkungslos in einem code_block) und
+# bietet keine Prolific-Rueckleitung. Daher:
+# - Geraete-Ausschluss in HALT aus (devices_exclude = FALSE); danach
+#   entscheidet SLT5_halt_passed() anhand von HALT.device_screening$correct.
+# - Die uebrigen HALT-Abbrueche (Links/rechts-Bild, Stereo-Kanaele, 5x
+#   Lautstaerke nicht eingestellt) laesst auto_config() bei screening_parts =
+#   TRUE nicht abschalten (lr_*_exclude wird auf TRUE zurueckgesetzt). Fuer sie
+#   wird HALT_stop_page() beim Aufbau durch unsere speichernde Stopp-Seite
+#   ersetzt (Entscheidung Anton 2026-10-16, nur fuer HALT 0.12.4).
 SLT5_halt <- function(label = "HALT", dict = SLT::SLT_dict, screenout_code = NULL) {
-  psychTestR::join(
+  halt <- SLT5_with_halt_stop_page(
+    # HALT ruft HALT_stop_page(dict) bzw. (dict = dict) mit HALT_dict auf -> ignorieren
+    function(...) SLT5_halt_internal_stop_page(label, dict, screenout_code),
     HALT::HALT(label = label,
                config = HALT::auto_config(frequency_check = FALSE, baserate_hp = 0.7,
-                                          devices_exclude = FALSE, lr_audio_exclude = FALSE),
-               dict = HALT::HALT_dict),
+                                          devices_exclude = FALSE),
+               dict = HALT::HALT_dict))
+  psychTestR::join(
+    halt,
     psychTestR::conditional(
       test = function(state, ...) !SLT5_halt_passed(state, label),
-      logic = SLT5_halt_stop_page(dict, screenout_code))
+      logic = SLT5_halt_stop_page(dict, screenout_code, reason = "device"))
+  )
+}
+
+# Wertet `expr` (Aufbau der HALT-Timeline) aus, waehrend HALT:::HALT_stop_page
+# durch `stop_page` ersetzt ist; danach wird das Original wiederhergestellt.
+# HALT ruft HALT_stop_page() nur beim Aufbau auf, nicht zur Laufzeit.
+SLT5_with_halt_stop_page <- function(stop_page, expr) {
+  if (utils::packageVersion("HALT") != "0.12.4") {
+    warning("SLT5: HALT ", utils::packageVersion("HALT"), " statt 0.12.4 installiert - ",
+            "HALT-eigene Abbrueche speichern evtl. nicht. Ersatz der Stopp-Seite uebersprungen.",
+            call. = FALSE)
+    return(expr)
+  }
+  orig <- get("HALT_stop_page", envir = asNamespace("HALT"))
+  utils::assignInNamespace("HALT_stop_page", stop_page, ns = "HALT")
+  on.exit(utils::assignInNamespace("HALT_stop_page", orig, ns = "HALT"), add = TRUE)
+  force(expr)
+}
+
+# Ersatz fuer HALT_stop_page(): laeuft innerhalb des HALT-Moduls. Grund des
+# Abbruchs aus HALTs lokalen Antworten bestimmen und speichern, HALT-Modul
+# verlassen, dann unsere Stopp-Seite (speichert, Screen-out-Link).
+SLT5_halt_internal_stop_page <- function(label, dict, screenout_code) {
+  psychTestR::join(
+    psychTestR::new_timeline(psychTestR::join(
+      psychTestR::code_block(function(state, ...) {
+        po4 <- psychTestR::get_local("po4", state)
+        po5 <- psychTestR::get_local("po5", state)
+        reason <- if (identical(po4, "right")) "lr_image"
+                  else if (!is.null(po5) && !identical(po5, "stereo channels correct")) "lr_audio"
+                  else "volume"
+        psychTestR::set_global("slt5_halt_stop_reason", reason, state)
+      }),
+      psychTestR::end_module()), dict = dict),
+    SLT5_halt_stop_page(dict, screenout_code)
   )
 }
 
@@ -106,12 +150,13 @@ SLT5_halt_passed <- function(state, label = "HALT") {
   isTRUE(if (is.list(ds) || is.data.frame(ds)) ds$correct else ds)
 }
 
-# Stopp-Seite fuer HALT-Ausschluss: speichert zuerst, dann Endseite
-SLT5_halt_stop_page <- function(dict = SLT::SLT_dict, screenout_code = NULL) {
+# Stopp-Seite fuer HALT-Ausschluss: speichert zuerst, dann Endseite.
+# `reason` = Abbruchgrund; NULL = aus Global slt5_halt_stop_reason
+SLT5_halt_stop_page <- function(dict = SLT::SLT_dict, screenout_code = NULL, reason = NULL) {
   psychTestR::join(
     # new_timeline mit dict, sonst setzt psychTestR die Sprachen dieses
     # Zweigs auf "en" und de/de_f werden fuer den ganzen Test abgelehnt
-    psychTestR::new_timeline(SLT5_save_prolific_ids_halt(), dict = dict),
+    psychTestR::new_timeline(SLT5_save_prolific_ids_halt(reason), dict = dict),
     psychTestR::elt_save_results_to_disk(complete = TRUE),
     psychTestR::new_timeline(
       psychTestR::final_page(shiny::div(
@@ -124,10 +169,14 @@ SLT5_halt_stop_page <- function(dict = SLT::SLT_dict, screenout_code = NULL) {
 
 # Prolific-ID auch bei HALT-Ausschluss speichern (eigenes Modul, da ausserhalb
 # des SLT-Moduls)
-SLT5_save_prolific_ids_halt <- function() {
+SLT5_save_prolific_ids_halt <- function(reason = NULL) {
   psychTestR::join(psychTestR::begin_module("SLT5_screenout"),
                    SLT5_save_prolific_ids(),
-                   psychTestR::code_block(function(state, ...) psychTestR::save_result(state, "halt_excluded", TRUE)),
+                   psychTestR::code_block(function(state, ...) {
+                     psychTestR::save_result(state, "halt_excluded", TRUE)
+                     r <- if (is.null(reason)) psychTestR::get_global("slt5_halt_stop_reason", state) else reason
+                     psychTestR::save_result(state, "halt_stop_reason", if (is.null(r)) NA_character_ else r)
+                   }),
                    psychTestR::end_module())
 }
 
@@ -494,9 +543,12 @@ SLT5_prolific_link <- function(code) {
                          class = "btn btn-default"))
 }
 
-# Abschluss: vollstaendig speichern, dann Endseite (ggf. mit Prolific-Link)
+# Abschluss: vollstaendig speichern, dann Endseite (ggf. mit Prolific-Link).
+# `finished` statt psychTestRs complete-Flag auswerten: HALT::HALT() speichert
+# am Modulende mit complete = TRUE, das Flag ist danach dauerhaft gesetzt.
 SLT5_final <- function(completion_code = NULL) {
   psychTestR::join(
+    psychTestR::code_block(function(state, ...) psychTestR::save_result(state, "finished", TRUE)),
     psychTestR::elt_save_results_to_disk(complete = TRUE),
     psychTestR::final_page(shiny::div(
       shiny::h4(psychTestR::i18n("SLT5_END_TITLE")),
