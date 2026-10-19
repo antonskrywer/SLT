@@ -91,6 +91,12 @@ SLT5_welcome_pages <- function() {
 #   wird HALT_stop_page() beim Aufbau durch unsere speichernde Stopp-Seite
 #   ersetzt (Entscheidung Anton 2026-10-16, nur fuer HALT 0.12.4).
 SLT5_halt <- function(label = "HALT", dict = SLT::SLT_dict, screenout_code = NULL) {
+  # HALT ist nur Suggests (Erhebung laeuft ohne HALT, Entscheidung 19.10.)
+  if (!requireNamespace("HALT", quietly = TRUE)) {
+    stop("SLT5: with_halt = TRUE braucht das Paket HALT ",
+         "(remotes::install_github(\"KilianSander/HALT\")) - oder with_halt = FALSE setzen.",
+         call. = FALSE)
+  }
   halt <- SLT5_with_halt_stop_page(
     # HALT ruft HALT_stop_page(dict) bzw. (dict = dict) mit HALT_dict auf -> ignorieren
     function(...) SLT5_halt_internal_stop_page(label, dict, screenout_code),

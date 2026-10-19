@@ -18,11 +18,11 @@ Imports:
     tidyverse (>= 1.2.1),
     dplyr,
     purrr,
-    tibble,
-    HALT
+    tibble
 Suggests:
     codetools,
-    devtools (>= 1.13.6)
+    devtools (>= 1.13.6),
+    HALT
 Remotes: 
     pmcharrison/psychTestR,
     KilianSander/HALT
