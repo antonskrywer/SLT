@@ -1,6 +1,7 @@
 # SLT (unreleased)
 
 * Added version 3 (Reber FSG) and version 4 (Loui FSG, Bohlen-Pierce scale) stimulus sets, alongside the original Markov-chain versions 1 and 2 (`SLT_item_bank3`, `main_test3()`, `get_items3()`)
+* Added version 6 (Siegelman et al., 2017, design transferred to tones): 16 whole tones, two tone languages L1/L2, clarinet-oddball reaction times scheduled in the browser via Web Audio, 34 2AFC recognition items (`main_test6()`, `SLT6_items`); audio ships with the package in `inst/audio/SLT6`
 * Added per-trial reaction time capture (`rt_decision_ms`, `rt_total_ms`) via `audio_NAFC_page_rt()`
 * Fixed a bug where `SLT_item2()` always recorded incorrect feedback for versions 3/4, caused by a local `correct` variable being shadowed by the item bank's own `correct` column in `dplyr::mutate()`
 

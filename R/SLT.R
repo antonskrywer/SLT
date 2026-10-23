@@ -51,12 +51,29 @@ SLT <- function(num_items = 20L,
     "3" = "https://s3.eu-west-1.amazonaws.com/media.dots.org/stimuli/SLT3/",
     "4" = "https://s3.eu-west-1.amazonaws.com/media.dots.org/stimuli/SLT4/",
     "5" = "https://s3.eu-west-1.amazonaws.com/media.dots.org/stimuli/SLT5/",
-    stop(sprintf("SLT: unbekannte version = %s (erlaubt: 1, 2, 3, 4, 5)", version))
+    "6" = "https://s3.eu-west-1.amazonaws.com/media.dots.org/stimuli/SLT6/",
+    stop(sprintf("SLT: unbekannte version = %s (erlaubt: 1, 2, 3, 4, 5, 6)", version))
   )
   # v5 (Pilot 2026): eigene Begruessung/Instruktionen in main_test5(), kein
   # Score-Feedback (Auswertung offline mit slt5_pilot_analysis.R)
   is_v5 <- as.character(version) == "5"
   if (is_v5) feedback <- NULL
+  # v6 (Demo 10/2026): eigener Ablauf in main_test6(), kein Score-Feedback.
+  # Audio liegt im Paket (inst/audio/SLT6) und kommt vom selben Server wie die
+  # App (die Einzeltoene werden per fetch() geladen; S3 braeuchte CORS).
+  # audio_dir kann per ... ueberschrieben werden; ein lokaler Ordner wird
+  # als Shiny-Ressource "slt6audio" bereitgestellt.
+  is_v6 <- as.character(version) == "6"
+  if (is_v6) {
+    feedback <- NULL
+    pkg_audio <- system.file("audio", "SLT6", package = "SLT")
+    if (nzchar(pkg_audio)) audio_dir <- pkg_audio
+    if (!is.null(list(...)$audio_dir)) audio_dir <- list(...)$audio_dir
+    if (dir.exists(audio_dir)) {
+      shiny::addResourcePath("slt6audio", normalizePath(audio_dir))
+      audio_dir <- "slt6audio"
+    }
+  }
   ### GEÄNDERT ENDE ###
 
   ### GEÄNDERT START — grammar_type einmalig ermitteln (fuer instructions() und main_test3()) ###
@@ -115,9 +132,9 @@ SLT <- function(num_items = 20L,
     if (is_v5 && with_welcome) psychTestR::new_timeline(SLT5_welcome_pages(), dict = dict),
     if (is_v5 && with_halt) SLT5_halt(dict = dict, screenout_code = list(...)$prolific_screenout_code),
     psychTestR::begin_module(label),
-    if (with_welcome && !is_v5) SLT_welcome_page(),
+    if (with_welcome && !is_v5 && !is_v6) SLT_welcome_page(),
     ### GEÄNDERT START — version/grammar_type an instructions() uebergeben ###
-    if (take_training && !is_v5) psychTestR::new_timeline(
+    if (take_training && !is_v5 && !is_v6) psychTestR::new_timeline(
       instructions(audio_dir, version = version, grammar_type = grammar_type),
       dict = dict),
     ### GEÄNDERT ENDE ###
@@ -164,7 +181,14 @@ SLT <- function(num_items = 20L,
                  dev_skip = null_or_else(list(...)$dev_skip, character()),
                  prolific_completion_code = list(...)$prolific_completion_code),
       dict = dict),
-    if (!is_v5) scoring(),
+    if (is_v6) psychTestR::new_timeline(
+      main_test6(label = label,
+                 audio_dir = audio_dir,
+                 dict = dict,
+                 autoplay = autoplay,
+                 dev_skip = null_or_else(list(...)$dev_skip, character())),
+      dict = dict),
+    if (!is_v5 && !is_v6) scoring(),
     psychTestR::elt_save_results_to_disk(complete = TRUE),
     feedback,
     psychTestR::code_block(function(state, ...){
