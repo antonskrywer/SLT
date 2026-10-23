@@ -18,7 +18,8 @@ Imports:
     tidyverse (>= 1.2.1),
     dplyr,
     purrr,
-    tibble
+    tibble,
+    jsonlite
 Suggests:
     codetools,
     devtools (>= 1.13.6),
